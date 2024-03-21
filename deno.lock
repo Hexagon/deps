@@ -1,0 +1,38 @@
+{
+  "version": "3",
+  "packages": {
+    "specifiers": {
+      "jsr:@cross/runtime@^0.0.17": "jsr:@cross/runtime@0.0.17",
+      "jsr:@cross/runtime@^1.0.0": "jsr:@cross/runtime@1.0.0",
+      "jsr:@cross/utils@~0.4.0": "jsr:@cross/utils@0.4.0",
+      "jsr:@std/semver@^0.219.1": "jsr:@std/semver@0.219.1"
+    },
+    "jsr": {
+      "@cross/runtime@0.0.17": {
+        "integrity": "23e08c6825fc2c81fb4e341d8c51731154039d19cfc44e60de4cf9ce23e36004"
+      },
+      "@cross/runtime@1.0.0": {
+        "integrity": "dddecdf99182df13d50279d1e473f715e83d41961c5c22edd7bb0c4c3cf8a76a"
+      },
+      "@cross/utils@0.4.0": {
+        "integrity": "50fdd171af30f3e53ae2561df782dfd547048da80916aaf8c1e32a8a784b30ce",
+        "dependencies": [
+          "jsr:@cross/runtime@^0.0.17"
+        ]
+      },
+      "@std/semver@0.219.1": {
+        "integrity": "1640e3368144090857ded3e944aa8743806bea712d5122c9fee2e9eb23c81607"
+      }
+    }
+  },
+  "remote": {},
+  "workspace": {
+    "dependencies": [
+      "jsr:@cross/log@^0.10.4",
+      "jsr:@cross/runtime@^1.0.0",
+      "jsr:@cross/test@^0.0.8",
+      "jsr:@cross/utils@~0.4.0",
+      "jsr:@std/semver@^0.219.1"
+    ]
+  }
+}

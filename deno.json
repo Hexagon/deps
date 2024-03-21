@@ -1,0 +1,9 @@
+{
+  "name": "@check/deps",
+  "version": "0.1.0",
+  "exports": "./mod.ts",
+  "imports": {
+    "@cross/utils": "jsr:@cross/utils@^0.6.2",
+    "@std/semver": "jsr:@std/semver@^0.219.1"
+  }
+}
