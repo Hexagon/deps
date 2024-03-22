@@ -19,13 +19,10 @@ export function getUpdateStatus(packageDetails: ImportDetails): UpdateStatus {
   if (!packageDetails.specifier || !packageDetails.latest) {
     return UpdateStatus.Unknown;
   }
-  if (!packageDetails.current) {
-    return UpdateStatus.Unused;
-  } else if (packageDetails.wanted == packageDetails.latest) {
+  if (packageDetails.wanted == packageDetails.latest) {
     return UpdateStatus.UpToDate;
   } else if (packageDetails.wanted != packageDetails.latest) {
     return UpdateStatus.Outdated;
-  } else {
-    return UpdateStatus.Unused;
   }
+  return UpdateStatus.Unused;
 }

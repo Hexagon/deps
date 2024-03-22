@@ -1,6 +1,6 @@
 {
   "name": "@check/deps",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "exports": "./deps.ts",
   "imports": {
     "@cross/test": "jsr:@cross/test@^0.0.8",
