@@ -2,6 +2,7 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@cross/deepmerge@^1.0.0": "jsr:@cross/deepmerge@1.0.0",
       "jsr:@cross/runtime@^1.0.0": "jsr:@cross/runtime@1.0.0",
       "jsr:@cross/utils@^0.7.0": "jsr:@cross/utils@0.7.0",
       "jsr:@std/assert@^0.220.1": "jsr:@std/assert@0.220.1",
@@ -12,6 +13,9 @@
       "npm:@types/node": "npm:@types/node@18.16.19"
     },
     "jsr": {
+      "@cross/deepmerge@1.0.0": {
+        "integrity": "1e1318a74e31ba1959b9aa0acae8bd417b806f74ffd25ac07c90e12f83ad6b1d"
+      },
       "@cross/runtime@1.0.0": {
         "integrity": "dddecdf99182df13d50279d1e473f715e83d41961c5c22edd7bb0c4c3cf8a76a"
       },
@@ -54,6 +58,7 @@
   "remote": {},
   "workspace": {
     "dependencies": [
+      "jsr:@cross/deepmerge@^1.0.0",
       "jsr:@cross/utils@^0.7.0",
       "jsr:@std/jsonc@^0.220.1",
       "jsr:@std/path@^0.220.1",

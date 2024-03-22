@@ -24,33 +24,37 @@ export const colorSchemes = {
   unused: Colors.yellow,
   updateAvailable: Colors.yellow,
   upToDate: Colors.green,
+  unsupported: Colors.dim,
+  builtin: Colors.green,
 };
 
 export function updateStatusText(updateStatus: UpdateStatus): string {
   switch (updateStatus) {
-    case UpdateStatus.Unknown:
-      return "Error";
     case UpdateStatus.Unused:
       return colorSchemes.unused(`Unused`);
     case UpdateStatus.UpToDate:
       return colorSchemes.upToDate("Up-to-date");
     case UpdateStatus.Outdated:
       return colorSchemes.outdated("Outdated");
+    case UpdateStatus.Unsupported:
+      return colorSchemes.unsupported("Unsupported");
+    case UpdateStatus.BuiltIn:
+      return colorSchemes.builtin("Built-in");
   }
 }
 
 export function printTable(updates: ImportDetails[], ignoreUnused: boolean) {
   const tableData = updates?.map((update) => [
+    update.registry,
     update.name || "",
     update.specifier || "",
     update.wanted || "",
     update.latest || "",
-    update.wanted
-      ? updateStatusText(getUpdateStatus(update, ignoreUnused))
-      : "Error",
+    updateStatusText(getUpdateStatus(update, ignoreUnused)),
   ]);
 
   tableData?.unshift([
+    Colors.bold("Registry"),
     Colors.bold("Package"),
     Colors.bold("Specifier"),
     Colors.bold("Wanted"),
