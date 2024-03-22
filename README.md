@@ -6,6 +6,9 @@
 deno run -A jsr:@check/deps [options]
 ```
 
+This will cache the current version locally on subsequent runs, add flag `-r` to
+refresh/update.
+
 **Options**
 
 - `--help`: Display usage instructions.
@@ -16,14 +19,19 @@ deno run -A jsr:@check/deps [options]
 **Example Output**
 
 ```
-Package         Specifier    Wanted     Latest               
-@cross/test     ^0.0.8       0.0.8      0.0.8      Unused    
-@cross/utils    ^0.7.0       0.7.0      0.7.0      OK        
-@std/jsonc      ^0.220.1     0.220.1    0.220.1    OK        
-@std/path       ^0.220.1     0.220.1    0.220.1    OK        
-@std/semver     ^0.220.1     0.220.1    0.220.1    OK        
+➜  deno run -A jsr:@check/deps
 
-Unused packages found.
+Registry    Package            Specifier    Wanted     Latest                   
+jsr         @cross/utils       ^0.2.1       0.2.1      0.7.0      Outdated      
+jsr         @std/path          0.220.1      0.220.1    0.220.1    Up-to-date    
+jsr         @cross/env         ^0.2.5       0.2.7      1.0.0      Outdated      
+npm         diff               5.2.0        5.2.0      5.2.0      Up-to-date    
+npm         fast-xml-parser    4.3.5        4.3.5      4.3.6      Outdated      
+npm         fflate             0.8.2        0.8.2      0.8.2      Up-to-date    
+npm         linkedom           0.16.9       0.16.9     0.16.10    Outdated      
+npm         mrmime             2.0.0        2.0.0      2.0.0      Up-to-date   
+
+Updates available.
 ```
 
 **Project Integration (example)**
