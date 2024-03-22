@@ -6,8 +6,12 @@
 deno run -A jsr:@check/deps [options]
 ```
 
-This will cache the current version locally on subsequent runs, add flag `-r` to
-refresh/update.
+This will cache the current version locally on subsequent runs. Append the
+refresh-flag `-r` to update to the latest version of @check/deps:
+
+```bash
+deno run -fA jsr:@check/deps [options]
+```
 
 **Options**
 
