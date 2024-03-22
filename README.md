@@ -3,7 +3,7 @@
 **Usage**
 
 ```bash
-deno run -A jsr:@check/deps@0.1.0 [options]
+deno run -A jsr:@check/deps [options]
 ```
 
 **Options**
@@ -32,7 +32,7 @@ Add a script to your `deno.json` for convenience:
 
 ```json
 "tasks": {
-  "check-deps": "deno run -A jsr:@check/deps@0.1.0"
+  "check-deps": "deno run -A jsr:@check/deps"
 }
 ```
 
