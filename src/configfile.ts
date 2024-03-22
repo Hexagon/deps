@@ -1,6 +1,7 @@
 import { join } from "@std/path";
 import { tryReadJsoncFile } from "./utils.ts";
 import { ImportDetails } from "./status.ts";
+import { default as denoJson } from "../deno.json" with { type: "json" };
 
 export interface DenoJson {
   imports?: string[];
@@ -47,7 +48,11 @@ async function fetchPackageMeta(
   name: string,
 ): Promise<ImportDetails | null> {
   const url = `https://jsr.io/@${scope}/${name}/meta.json`;
-  const headers = new Headers({ "Accept": "application/json" });
+  const headers = new Headers({
+    "Accept": "application/json",
+    "User-Agent":
+      `${denoJson.name}/${denoJson.version}; https://jsr.io/${denoJson.name}`,
+  });
   try {
     const response = await fetch(url, { headers });
     if (response.ok) {
