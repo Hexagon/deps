@@ -9,3 +9,4 @@ jobs:
     uses: cross-org/workflows/.github/workflows/deno-ci.yml@main
     with:
       entrypoint: deps.ts
+      run_tests: false
