@@ -6,7 +6,10 @@ export interface UpdateStatistics {
   upToDate: number;
 }
 
-export function stats(updates: ImportDetails[]): UpdateStatistics {
+export function stats(
+  updates: ImportDetails[],
+  ignoreUnused: boolean,
+): UpdateStatistics {
   const statusCounts: UpdateStatistics = {
     outdated: 0,
     unused: 0,
@@ -14,7 +17,7 @@ export function stats(updates: ImportDetails[]): UpdateStatistics {
   };
 
   updates?.forEach((update) => {
-    switch (getUpdateStatus(update)) {
+    switch (getUpdateStatus(update, ignoreUnused)) {
       case UpdateStatus.Outdated:
         statusCounts.outdated++;
         break;

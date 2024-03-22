@@ -47,10 +47,10 @@ const ignoreUnused = parsedArgs.count("ignore-unused") > 0 || !lockFile;
 if (updates) {
   // If not silent, print table
   if (!parsedArgs.count("slim") && updates) {
-    printTable(updates);
+    printTable(updates, ignoreUnused);
   }
 
-  printStatsAndExit(stats(updates), ignoreUnused, !!parsedArgs.count("slim"));
+  printStatsAndExit(stats(updates, ignoreUnused), !!parsedArgs.count("slim"));
 
   // If no packages were found
 } else {

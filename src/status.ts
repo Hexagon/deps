@@ -15,14 +15,20 @@ export enum UpdateStatus {
   Outdated,
 }
 
-export function getUpdateStatus(packageDetails: ImportDetails): UpdateStatus {
+export function getUpdateStatus(
+  packageDetails: ImportDetails,
+  ignoreUnused: boolean,
+): UpdateStatus {
   if (!packageDetails.specifier || !packageDetails.latest) {
     return UpdateStatus.Unknown;
   }
-  if (packageDetails.wanted == packageDetails.latest) {
+  if (!packageDetails.current && !ignoreUnused) {
+    return UpdateStatus.Unused;
+  } else if (packageDetails.wanted == packageDetails.latest) {
     return UpdateStatus.UpToDate;
   } else if (packageDetails.wanted != packageDetails.latest) {
     return UpdateStatus.Outdated;
+  } else {
+    return UpdateStatus.Unknown;
   }
-  return UpdateStatus.Unused;
 }

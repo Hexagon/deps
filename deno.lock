@@ -54,7 +54,6 @@
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@cross/test@^0.0.8",
       "jsr:@cross/utils@^0.7.0",
       "jsr:@std/jsonc@^0.220.1",
       "jsr:@std/path@^0.220.1",

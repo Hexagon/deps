@@ -7,6 +7,7 @@ import { UpdateStatistics } from "./stats.ts";
 export function parseArgs() {
   return new ArgsParser(args());
 }
+
 export function printHelpAndExit() {
   console.log(
     `Usage: deno run -A jsr:@check/deps@${denoJson.version} [options]`,
@@ -38,13 +39,15 @@ export function updateStatusText(updateStatus: UpdateStatus): string {
   }
 }
 
-export function printTable(updates: ImportDetails[]) {
+export function printTable(updates: ImportDetails[], ignoreUnused: boolean) {
   const tableData = updates?.map((update) => [
     update.name || "",
     update.specifier || "",
     update.wanted || "",
     update.latest || "",
-    update.wanted ? updateStatusText(getUpdateStatus(update)) : "Error",
+    update.wanted
+      ? updateStatusText(getUpdateStatus(update, ignoreUnused))
+      : "Error",
   ]);
 
   tableData?.unshift([
@@ -65,11 +68,9 @@ export function printTable(updates: ImportDetails[]) {
 
 export function printStatsAndExit(
   statusCounts: UpdateStatistics,
-  ignoreUnused: boolean,
   slim: boolean,
 ) {
-  const sumNotOk = statusCounts.outdated +
-    (ignoreUnused ? 0 : statusCounts.unused);
+  const sumNotOk = statusCounts.outdated + statusCounts.unused;
 
   // Message if all dependencies are up-to-date
   if (sumNotOk === 0) {

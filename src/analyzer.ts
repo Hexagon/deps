@@ -9,7 +9,6 @@ export function analyzePackageVersions(
 ): ImportDetails {
   // Find the currently used version in denoLock (if it exists)
   packageDetails.current = extractVersionFromLock(denoLock, packageDetails);
-
   // Find the latest matching version within the specified range
   const versions = packageDetails.available.map(parse).filter((v) =>
     v !== null
