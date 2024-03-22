@@ -24,14 +24,14 @@ const colorSchemes = {
 
 async function tryReadFile(
   filename: string,
-): Promise<Record<string, string> | undefined> {
+): Promise<DenoJson | undefined> {
   try {
     const text = await Deno.readTextFile(filename);
     const fileContent = parseJsonc(text);
     if (fileContent) {
-      return fileContent;
+      return fileContent as unknown as DenoJson;
     } else {
-      return {};
+      return {} as DenoJson;
     }
   } catch (_error) {
     // Could log a warning here if needed
@@ -84,12 +84,20 @@ function extractVersionFromLock(
   }
 }
 
+interface DenoPackages {
+  specifiers?: string[];
+}
+interface DenoJson {
+  imports?: string[];
+  packages?: DenoPackages;
+}
+
 // Analyzes dependencies listed in deno.json
 async function analyzeDependencies(
   basePath?: string,
 ): Promise<ImportDetails[]> {
   // Read deno.json
-  const sources: unknown[] = [];
+  const sources: DenoJson[] = [];
   for (
     const jsonFilename of ["deno.json", "deno.jsonc", "jsr.json", "jsr.jsonc"]
   ) {
@@ -112,20 +120,17 @@ async function analyzeDependencies(
 
   const updateInfo: ImportDetails[] = [];
 
-  if (sources.length) {
+  if (sources.length && sources[0].imports) {
     for (
-      const [_importName, versionSpecifier] of Object.entries(
-        sources[0].imports,
-      )
+      const entry of Object.values(sources[0].imports)
     ) {
-      const [, packageName, currentVersion] = (versionSpecifier as string)
-        .split("@");
+      const [, packageName, currentVersion] = entry.split("@");
       const [scope, name] = packageName.split("/");
       const meta = await fetchPackageMeta(scope, name);
       if (meta) {
         if (Object.prototype.hasOwnProperty.call(denoLock, "packages")) {
           meta.current = extractVersionFromLock(
-            denoLock.packages.specifiers,
+            denoLock?.packages?.specifiers,
             scope,
             name,
           );
@@ -182,7 +187,7 @@ if (parsedArgs.count("help")) {
 }
 
 // Entry point
-let updates: ImportDetails[];
+let updates: ImportDetails[] | undefined = undefined;
 try {
   const cwd = parsedArgs.get("cwd") as string;
   updates = await analyzeDependencies(cwd || "");
@@ -190,9 +195,15 @@ try {
   console.error(Colors.red(e.message));
   exit(1);
 }
+
+if (!updates) {
+  console.error("No sources found.");
+  exit(1);
+}
+
 // If not silent
 if (!parsedArgs.count("slim")) {
-  const tableData = updates.map((update) => [
+  const tableData = updates?.map((update) => [
     update.name || "",
     update.specifier || "",
     update.wanted || "",
@@ -200,7 +211,7 @@ if (!parsedArgs.count("slim")) {
     update.wanted ? colorizeUpdateStatus(update) : "Error",
   ]);
 
-  tableData.unshift([
+  tableData?.unshift([
     Colors.bold("Package"),
     Colors.bold("Specifier"),
     Colors.bold("Wanted"),
@@ -209,9 +220,11 @@ if (!parsedArgs.count("slim")) {
   ]);
 
   // Print the table
-  console.log("");
-  table(tableData);
-  console.log("");
+  if (tableData) {
+    console.log("");
+    table(tableData);
+    console.log("");
+  }
 }
 const statusCounts = {
   outdated: 0,
@@ -220,7 +233,7 @@ const statusCounts = {
   upToDate: 0, // Assuming you might have up-to-date packages
 };
 
-updates.forEach((update) => {
+updates?.forEach((update) => {
   switch (colorizeUpdateStatus(update)) {
     case colorSchemes.outdated("Outdated"):
       statusCounts.outdated++;

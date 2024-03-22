@@ -8,4 +8,4 @@ jobs:
   deno_ci:
     uses: cross-org/workflows/.github/workflows/deno-ci.yml@main
     with:
-      entrypoint: mod.ts
+      entrypoint: deps.ts
