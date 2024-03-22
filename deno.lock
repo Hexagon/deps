@@ -2,37 +2,51 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "jsr:@cross/runtime@^0.0.17": "jsr:@cross/runtime@0.0.17",
       "jsr:@cross/runtime@^1.0.0": "jsr:@cross/runtime@1.0.0",
-      "jsr:@cross/utils@~0.4.0": "jsr:@cross/utils@0.4.0",
-      "jsr:@std/semver@^0.219.1": "jsr:@std/semver@0.219.1"
+      "jsr:@cross/utils@^0.7.0": "jsr:@cross/utils@0.7.0",
+      "jsr:@std/assert@^0.220.1": "jsr:@std/assert@0.220.1",
+      "jsr:@std/jsonc@^0.220.1": "jsr:@std/jsonc@0.220.1",
+      "jsr:@std/path@^0.220.1": "jsr:@std/path@0.220.1",
+      "jsr:@std/semver@^0.220.1": "jsr:@std/semver@0.220.1"
     },
     "jsr": {
-      "@cross/runtime@0.0.17": {
-        "integrity": "23e08c6825fc2c81fb4e341d8c51731154039d19cfc44e60de4cf9ce23e36004"
-      },
       "@cross/runtime@1.0.0": {
         "integrity": "dddecdf99182df13d50279d1e473f715e83d41961c5c22edd7bb0c4c3cf8a76a"
       },
-      "@cross/utils@0.4.0": {
-        "integrity": "50fdd171af30f3e53ae2561df782dfd547048da80916aaf8c1e32a8a784b30ce",
+      "@cross/utils@0.7.0": {
+        "integrity": "c03726c5cf34862e03d85ed444d5175ec3c8f26cd6ac1be080187acb865f6ff0",
         "dependencies": [
-          "jsr:@cross/runtime@^0.0.17"
+          "jsr:@cross/runtime@^1.0.0"
         ]
       },
-      "@std/semver@0.219.1": {
-        "integrity": "1640e3368144090857ded3e944aa8743806bea712d5122c9fee2e9eb23c81607"
+      "@std/assert@0.220.1": {
+        "integrity": "88710d54f3afdd7a5761e7805abba1f56cd14e4b212feffeb3e73a9f77482425"
+      },
+      "@std/jsonc@0.220.1": {
+        "integrity": "50c3e805142e57d93019755b33c24ae983ca7874c7e250ba6a87a1755a982018",
+        "dependencies": [
+          "jsr:@std/assert@^0.220.1"
+        ]
+      },
+      "@std/path@0.220.1": {
+        "integrity": "cc63c1b5e5192e2f718dc2f365a3514fffb26cc0380959bab0f8fb5988a52f0c",
+        "dependencies": [
+          "jsr:@std/assert@^0.220.1"
+        ]
+      },
+      "@std/semver@0.220.1": {
+        "integrity": "f3df4abc715ad723680011f19d2934cfd436b4c41c317e82bfc14ac586b3b724"
       }
     }
   },
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@cross/log@^0.10.4",
-      "jsr:@cross/runtime@^1.0.0",
       "jsr:@cross/test@^0.0.8",
-      "jsr:@cross/utils@~0.4.0",
-      "jsr:@std/semver@^0.219.1"
+      "jsr:@cross/utils@^0.7.0",
+      "jsr:@std/jsonc@^0.220.1",
+      "jsr:@std/path@^0.220.1",
+      "jsr:@std/semver@^0.220.1"
     ]
   }
 }

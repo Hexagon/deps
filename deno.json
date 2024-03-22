@@ -1,9 +1,15 @@
 {
   "name": "@check/deps",
   "version": "0.1.0",
-  "exports": "./mod.ts",
+  "exports": "./deps.ts",
   "imports": {
-    "@cross/utils": "jsr:@cross/utils@^0.6.2",
-    "@std/semver": "jsr:@std/semver@^0.219.1"
+    "@cross/test": "jsr:@cross/test@^0.0.8",
+    "@cross/utils": "jsr:@cross/utils@^0.7.0",
+    "@std/jsonc": "jsr:@std/jsonc@^0.220.1",
+    "@std/path": "jsr:@std/path@^0.220.1",
+    "@std/semver": "jsr:@std/semver@^0.220.1"
+  },
+  "publish": {
+    "exclude": [".github"]
   }
 }

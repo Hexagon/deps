@@ -1,7 +1,9 @@
-import { maxSatisfying, parse, format, parseRange, compare } from "@std/semver";
-import { exit, Colors } from "@cross/utils";
-import { renderTable } from "./table.ts";
-
+import { format, maxSatisfying, parse, parseRange } from "@std/semver";
+import { args, ArgsParser, Colors, exit } from "@cross/utils";
+import { table } from "@cross/utils/table";
+import { parse as parseJsonc } from "@std/jsonc";
+import { join } from "@std/path";
+import { default as denoJson } from "./deno.json" with { type: "json" };
 
 // Interface for import details
 interface ImportDetails {
@@ -9,35 +11,54 @@ interface ImportDetails {
   current: string | null;
   specifier: string | null;
   latest: string;
-  wanted: string | null; 
-  available: string[]
+  wanted: string | null;
+  available: string[];
 }
 
 const colorSchemes = {
   outdated: Colors.red,
   unused: Colors.yellow,
   updateAvailable: Colors.yellow,
-  upToDate: Colors.green
+  upToDate: Colors.green,
 };
 
+async function tryReadFile(
+  filename: string,
+): Promise<Record<string, string> | undefined> {
+  try {
+    const text = await Deno.readTextFile(filename);
+    const fileContent = parseJsonc(text);
+    if (fileContent) {
+      return fileContent;
+    } else {
+      return {};
+    }
+  } catch (_error) {
+    // Could log a warning here if needed
+  }
+}
+
 // Fetches package metadata from jsr.io
-async function fetchPackageMeta(scope: string, name: string): Promise<ImportDetails | null> {
+async function fetchPackageMeta(
+  scope: string,
+  name: string,
+): Promise<ImportDetails | null> {
   const url = `https://jsr.io/@${scope}/${name}/meta.json`;
   const headers = new Headers({ "Accept": "application/json" });
   try {
     const response = await fetch(url, { headers });
     if (response.ok) {
-      const meta = await response.json(); 
+      const meta = await response.json();
       return {
         name: `@${scope}/${name}`,
         current: null,
         specifier: null,
         latest: meta.latest,
         wanted: null, // Initialize wanted
-        available: Object.keys(meta.versions)
+        available: Object.keys(meta.versions),
       };
     } else {
-      return null;  
+      return null;
     }
   } catch (error) {
     console.error("Error fetching meta:", error);
@@ -45,14 +66,18 @@ async function fetchPackageMeta(scope: string, name: string): Promise<ImportDeta
   }
 }
 
-function extractVersionFromLock(specifiers: any, scope: string, name: string): string | null {
-  const packageName = `@${scope}/${name}`; 
+function extractVersionFromLock(
+  specifiers: unknown,
+  scope: string,
+  name: string,
+): string | null {
+  const packageName = `@${scope}/${name}`;
 
-  // Filter for the matching package  
-  const matchingEntries = Object.entries(specifiers || {}) 
-                            .filter(([_, val]) => (val as string || "").includes(packageName)); 
+  // Filter for the matching package
+  const matchingEntries = Object.entries(specifiers || {})
+    .filter(([_, val]) => (val as string || "").includes(packageName));
   if (matchingEntries.length > 0) {
-    const [, , version] = (matchingEntries[0][1] as string).split('@'); // Extract from the first match
+    const [, , version] = (matchingEntries[0][1] as string).split("@"); // Extract from the first match
     return version;
   } else {
     return null;
@@ -60,32 +85,65 @@ function extractVersionFromLock(specifiers: any, scope: string, name: string): s
 }
 
 // Analyzes dependencies listed in deno.json
-async function analyzeDependencies(denoJsonPath: string): Promise<ImportDetails[]> {
-  
+async function analyzeDependencies(
+  basePath?: string,
+): Promise<ImportDetails[]> {
   // Read deno.json
-  const denoJsonText = await Deno.readTextFile(denoJsonPath);
-  const denoJson = JSON.parse(denoJsonText);
+  const sources: unknown[] = [];
+  for (
+    const jsonFilename of ["deno.json", "deno.jsonc", "jsr.json", "jsr.jsonc"]
+  ) {
+    const currentFile = await tryReadFile(join(basePath || "", jsonFilename));
+    if (
+      currentFile &&
+      Object.prototype.hasOwnProperty.call(currentFile, "imports")
+    ) {
+      sources.push(currentFile);
+    }
+  }
+
+  // No sources found
+  if (!sources.length) {
+    throw new Error("No sources found.");
+  }
 
   // Read deno.lock
-  const denoLockPath = denoJsonPath.replace("deno.json", "deno.lock");
-  const denoLockText = await Deno.readTextFile(denoLockPath);
-  const denoLock = JSON.parse(denoLockText);
+  const denoLock = await tryReadFile(join(basePath || "", "deno.lock"));
 
   const updateInfo: ImportDetails[] = [];
-  for (const [_importName, versionSpecifier] of Object.entries(denoJson.imports)) {
-    const [, packageName, currentVersion] = (versionSpecifier as string).split("@"); 
-    const [scope, name] = packageName.split("/");
-    const meta = await fetchPackageMeta(scope, name);
-    if (meta) {
-      meta.current = extractVersionFromLock(denoLock.packages.specifiers, scope, name);
-      meta.specifier = currentVersion;
 
-      // Find the latest matching version within the specified range
-      const versions = meta.available.map(parse).filter(v => v !== null);
-      const latestMatching = maxSatisfying(versions, parseRange(currentVersion));
-      meta.wanted = latestMatching ? format(latestMatching) : null;
+  if (sources.length) {
+    for (
+      const [_importName, versionSpecifier] of Object.entries(
+        sources[0].imports,
+      )
+    ) {
+      const [, packageName, currentVersion] = (versionSpecifier as string)
+        .split("@");
+      const [scope, name] = packageName.split("/");
+      const meta = await fetchPackageMeta(scope, name);
+      if (meta) {
+        if (Object.prototype.hasOwnProperty.call(denoLock, "packages")) {
+          meta.current = extractVersionFromLock(
+            denoLock.packages.specifiers,
+            scope,
+            name,
+          );
+        } else {
+          meta.current = null;
+        }
+        meta.specifier = currentVersion;
 
-      updateInfo.push(meta); 
+        // Find the latest matching version within the specified range
+        const versions = meta.available.map(parse).filter((v) => v !== null);
+        const latestMatching = maxSatisfying(
+          versions,
+          parseRange(currentVersion),
+        );
+        meta.wanted = latestMatching ? format(latestMatching) : null;
+
+        updateInfo.push(meta);
+      }
     }
   }
 
@@ -94,13 +152,12 @@ async function analyzeDependencies(denoJsonPath: string): Promise<ImportDetails[
 
 function colorizeUpdateStatus(updateStatus: ImportDetails) {
   if (!updateStatus.specifier || !updateStatus.latest) {
-     return "Error"; // Handle missing version info
+    return "Error"; // Handle missing version info
   }
-  if (!updateStatus.current) {
+  if (!updateStatus.current && !parsedArgs.count("ignore-unused")) {
     return colorSchemes.unused(`Unused`);
-  } else 
-  if (updateStatus.wanted == updateStatus.latest) {
-    return colorSchemes.upToDate("Up-to-date");
+  } else if (updateStatus.wanted == updateStatus.latest) {
+    return colorSchemes.upToDate("OK");
   } else if (updateStatus.wanted != updateStatus.latest) {
     return colorSchemes.outdated("Outdated");
   } else {
@@ -108,44 +165,67 @@ function colorizeUpdateStatus(updateStatus: ImportDetails) {
   }
 }
 
-// Entry point 
-const updates = await analyzeDependencies("./deno.json");
+// Parse arguments
+const parsedArgs = new ArgsParser(args());
 
-const tableData = updates.map(update => [
+// Handle help argument
+if (parsedArgs.count("help")) {
+  console.log(
+    `Usage: deno run -A jsr:@check/deps@${denoJson.version} [options]`,
+  );
+  console.log("Options:");
+  console.log("  --help            Show this help message");
+  console.log("  --cwd <dir>       Set the working directory");
+  console.log("  --slim            Suppress table output");
+  console.log("  --ignore-unused   Don't report on unused packages");
+  exit(0);
+}
+
+// Entry point
+let updates: ImportDetails[];
+try {
+  const cwd = parsedArgs.get("cwd") as string;
+  updates = await analyzeDependencies(cwd || "");
+} catch (e) {
+  console.error(Colors.red(e.message));
+  exit(1);
+}
+// If not silent
+if (!parsedArgs.count("slim")) {
+  const tableData = updates.map((update) => [
     update.name || "",
     update.specifier || "",
     update.wanted || "",
     update.latest || "",
-    update.wanted ? colorizeUpdateStatus(update) : "Error"
-]);
+    update.wanted ? colorizeUpdateStatus(update) : "Error",
+  ]);
 
-tableData.unshift([
-  Colors.bold("Package"),
-  Colors.bold("Specifier"),
-  Colors.bold("Wanted"),
-  Colors.bold("Latest"),
-  Colors.bold("")
-]);
+  tableData.unshift([
+    Colors.bold("Package"),
+    Colors.bold("Specifier"),
+    Colors.bold("Wanted"),
+    Colors.bold("Latest"),
+    Colors.bold(""),
+  ]);
 
-// Print the table
-
-console.log("");
-renderTable(tableData); 
-console.log("");
-
+  // Print the table
+  console.log("");
+  table(tableData);
+  console.log("");
+}
 const statusCounts = {
   outdated: 0,
   updateAvailable: 0,
   unused: 0,
-  upToDate: 0 // Assuming you might have up-to-date packages 
+  upToDate: 0, // Assuming you might have up-to-date packages
 };
 
-updates.forEach(update => {
+updates.forEach((update) => {
   switch (colorizeUpdateStatus(update)) {
     case colorSchemes.outdated("Outdated"):
       statusCounts.outdated++;
       break;
-    case colorSchemes.updateAvailable("Update to..."): 
+    case colorSchemes.updateAvailable("Update to..."):
       statusCounts.updateAvailable++;
       break;
     case colorSchemes.unused("Unused"):
@@ -157,13 +237,23 @@ updates.forEach(update => {
   }
 });
 
-const sumNotOk = statusCounts.outdated + statusCounts.updateAvailable + statusCounts.unused;
+const sumNotOk = statusCounts.outdated + statusCounts.updateAvailable +
+  (parsedArgs.count("ignore-unused") ? 0 : statusCounts.unused);
 
 // Message if all dependencies are up-to-date
 if (sumNotOk === 0) {
-  console.log(Colors.green("All dependencies are up-to-date.\n"));
+  console.log(Colors.green("All dependencies are up-to-date."));
+  if (!parsedArgs.count("slim")) console.log("");
   exit(0);
 } else {
-  console.log(Colors.yellow("Updates available.\n"));
+  let statusText = "";
+  if (statusCounts.outdated + statusCounts.updateAvailable > 0) {
+    statusText += Colors.yellow("Updates available. ");
+  }
+  if (statusCounts.unused > 0) {
+    statusText += Colors.yellow("Unused packages found. ");
+  }
+  console.log(statusText);
+  if (!parsedArgs.count("slim")) console.log("");
   exit(1);
 }
