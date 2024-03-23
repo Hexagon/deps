@@ -1,8 +1,8 @@
 import { default as denoJson } from "../deno.json" with { type: "json" };
 import { args, ArgsParser, Colors, exit } from "@cross/utils";
 import { table } from "@cross/utils/table";
-import { getUpdateStatus, ImportDetails, UpdateStatus } from "./status.ts";
 import { UpdateStatistics } from "./stats.ts";
+import { Package } from "./package.ts";
 
 export function parseArgs() {
   return new ArgsParser(args());
@@ -22,41 +22,31 @@ export function printHelpAndExit() {
 export const colorSchemes = {
   outdated: Colors.red,
   unused: Colors.yellow,
-  updateAvailable: Colors.yellow,
   upToDate: Colors.green,
   unsupported: Colors.dim,
   builtin: Colors.green,
 };
 
-export function updateStatusText(updateStatus: UpdateStatus): string {
-  switch (updateStatus) {
-    case UpdateStatus.Unused:
-      return colorSchemes.unused(`Unused`);
-    case UpdateStatus.UpToDate:
-      return colorSchemes.upToDate("Up-to-date");
-    case UpdateStatus.Outdated:
-      return colorSchemes.outdated("Outdated");
-    case UpdateStatus.Unsupported:
-      return colorSchemes.unsupported("Unsupported");
-    case UpdateStatus.BuiltIn:
-      return colorSchemes.builtin("Built-in");
-  }
+export function updateStatusText(p: Package, ignoreUnused: boolean): string {
+  let text = "";
+  if (p.isOutdated()) text += colorSchemes.outdated("Outdated ");
+  if (p.isUpToDate()) text += colorSchemes.upToDate("Up-to-date ");
+  if (!p.isSupported()) text += colorSchemes.unsupported("Unsupported ");
+  if (p.isBuiltIn()) text += colorSchemes.builtin("Built-in ");
+  if (p.isUnused() && !ignoreUnused) text += colorSchemes.unused(`Unused `);
+  return text;
 }
 
-export function printTable(updates: ImportDetails[], ignoreUnused: boolean) {
-  const tableData = updates?.map((update) => [
-    update.registry,
-    update.name || "",
-    update.specifier || "",
-    update.wanted || "",
-    update.latest || "",
-    updateStatusText(getUpdateStatus(update, ignoreUnused)),
+export function printTable(packages: Package[], ignoreUnused: boolean) {
+  const tableData = packages?.map((p) => [
+    `${p.registry}:${p.name}${(p.specifier ? ("@" + p.specifier) : "")}`,
+    p.wanted || "",
+    p.latest || "",
+    updateStatusText(p, ignoreUnused),
   ]);
 
   tableData?.unshift([
-    Colors.bold("Registry"),
     Colors.bold("Package"),
-    Colors.bold("Specifier"),
     Colors.bold("Wanted"),
     Colors.bold("Latest"),
     Colors.bold(""),
@@ -73,8 +63,10 @@ export function printTable(updates: ImportDetails[], ignoreUnused: boolean) {
 export function printStatsAndExit(
   statusCounts: UpdateStatistics,
   slim: boolean,
+  ignoreUnused: boolean,
 ) {
-  const sumNotOk = statusCounts.outdated + statusCounts.unused;
+  const sumNotOk = statusCounts.outdated +
+    (ignoreUnused ? 0 : statusCounts.unused);
 
   // Message if all dependencies are up-to-date
   if (sumNotOk === 0) {
@@ -86,7 +78,7 @@ export function printStatsAndExit(
     if (statusCounts.outdated > 0) {
       statusText += Colors.yellow("Updates available. ");
     }
-    if (statusCounts.unused > 0) {
+    if (statusCounts.unused > 0 && !ignoreUnused) {
       statusText += Colors.yellow("Unused packages found. ");
     }
     console.log(statusText);

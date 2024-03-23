@@ -6,11 +6,11 @@ import {
   printSuccessAndExit,
   printTable,
 } from "./src/cli.ts";
-import { ImportDetails } from "./src/status.ts";
 import { tryReadJsoncFile } from "./src/utils.ts";
 import { stats } from "./src/stats.ts";
 import { DenoLock, getDenoLockPath } from "./src/lockfile.ts";
 import { analyzeDependencies } from "./src/analyzer.ts";
+import { Package } from "./src/package.ts";
 
 // Parse arguments
 const parsedArgs = parseArgs();
@@ -21,7 +21,7 @@ if (parsedArgs.count("help")) {
 }
 
 // Entry point
-let updates: ImportDetails[] | null = null;
+let packages: Package[] | null = null;
 let lockFile: DenoLock | null = null;
 try {
   const workingDir = parsedArgs.get("cwd");
@@ -31,7 +31,8 @@ try {
   lockFile = await tryReadJsoncFile(
     getDenoLockPath(workingDir as string | undefined || ""),
   );
-  updates = await analyzeDependencies(
+
+  packages = await analyzeDependencies(
     lockFile,
     workingDir as string | undefined || "",
   );
@@ -44,13 +45,13 @@ try {
 const ignoreUnused = parsedArgs.count("ignore-unused") > 0 || !lockFile;
 
 // If packages were found
-if (updates) {
+if (packages) {
   // If not silent, print table
-  if (!parsedArgs.count("slim") && updates) {
-    printTable(updates, ignoreUnused);
+  if (!parsedArgs.count("slim") && packages) {
+    printTable(packages, ignoreUnused);
   }
 
-  printStatsAndExit(stats(updates, ignoreUnused), !!parsedArgs.count("slim"));
+  printStatsAndExit(stats(packages), !!parsedArgs.count("slim"), ignoreUnused);
 
   // If no packages were found
 } else {

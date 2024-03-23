@@ -1,33 +1,27 @@
-import { getUpdateStatus, ImportDetails, UpdateStatus } from "./status.ts";
+import { Package } from "./package.ts";
 
 export interface UpdateStatistics {
   outdated: number;
   unused: number;
   upToDate: number;
+  unsupported: number;
 }
 
 export function stats(
-  updates: ImportDetails[],
-  ignoreUnused: boolean,
+  packages: Package[],
 ): UpdateStatistics {
   const statusCounts: UpdateStatistics = {
     outdated: 0,
     unused: 0,
     upToDate: 0,
+    unsupported: 0,
   };
 
-  updates?.forEach((update) => {
-    switch (getUpdateStatus(update, ignoreUnused)) {
-      case UpdateStatus.Outdated:
-        statusCounts.outdated++;
-        break;
-      case UpdateStatus.Unused:
-        statusCounts.unused++;
-        break;
-      case UpdateStatus.UpToDate:
-        statusCounts.upToDate++;
-        break;
-    }
+  packages.forEach((update) => {
+    if (update.isOutdated()) statusCounts.outdated++;
+    if (update.isUnused()) statusCounts.unused++;
+    if (update.isUpToDate()) statusCounts.upToDate++;
+    if (!update.isSupported()) statusCounts.unsupported++;
   });
 
   return statusCounts;

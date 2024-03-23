@@ -1,33 +1,11 @@
-import { format, maxSatisfying, parse, parseRange } from "@std/semver";
-import { parseImportEntry, readDenoConfig } from "./configfile.ts";
-import { DenoLock, extractVersionFromLock } from "./lockfile.ts";
-import { ImportDetails } from "./status.ts";
-
-export function analyzePackageVersions(
-  packageDetails: ImportDetails,
-  denoLock: DenoLock | null,
-): ImportDetails {
-  // Find the currently used version in denoLock (if it exists)
-  packageDetails.current = extractVersionFromLock(denoLock, packageDetails);
-  // Find the latest matching version within the specified range
-  const versions = packageDetails.available.map(parse).filter((v) =>
-    v !== null
-  );
-  if (packageDetails.specifier) {
-    const latestMatching = maxSatisfying(
-      versions,
-      parseRange(packageDetails.specifier),
-    );
-    packageDetails.wanted = latestMatching ? format(latestMatching) : null;
-  }
-
-  return packageDetails;
-}
+import { readDenoConfig } from "./configfile.ts";
+import { DenoLock } from "./lockfile.ts";
+import { Package } from "./package.ts";
 
 export async function analyzeDependencies(
   denoLock: DenoLock | null,
   basePath: string,
-): Promise<ImportDetails[] | null> {
+): Promise<Package[] | null> {
   // Get all config files
   const denoConfigs = await readDenoConfig(basePath);
 
@@ -35,17 +13,21 @@ export async function analyzeDependencies(
   const firstConfigFile = denoConfigs.find((configFile) => configFile.imports);
   if (!firstConfigFile) {
     return null;
+
+    // Ready to go
   } else {
     // Download metadata for all packages
     const importsClause = firstConfigFile?.imports;
     if (importsClause) {
-      const importPromises = Object.values(importsClause).map(async (
+      const packages = Object.values(importsClause).map(async (
         entry: string,
-      ) => await parseImportEntry(entry));
-      const importDetails = await Promise.all(importPromises);
-      return importDetails.map((meta) =>
-        analyzePackageVersions(meta, denoLock)
-      );
+      ) => {
+        const p = new Package(entry);
+        if (denoLock) p.addDenoLockfile(denoLock);
+        await p.analyze();
+        return p;
+      });
+      return await Promise.all(packages);
     } else {
       return [];
     }

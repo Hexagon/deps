@@ -1,9 +1,8 @@
 {
   "name": "@check/deps",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "exports": "./deps.ts",
   "imports": {
-    "@cross/deepmerge": "jsr:@cross/deepmerge@^1.0.0",
     "@cross/utils": "jsr:@cross/utils@^0.7.0",
     "@std/jsonc": "jsr:@std/jsonc@^0.220.1",
     "@std/path": "jsr:@std/path@^0.220.1",
