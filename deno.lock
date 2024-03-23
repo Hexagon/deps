@@ -54,7 +54,11 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@jsr/cross__deepmerge@^1.0.0"
+        "npm:@jsr/cross__runtime@^1.0.0",
+        "npm:@jsr/cross__utils@^0.7.0",
+        "npm:@jsr/std__jsonc@^0.220.1",
+        "npm:@jsr/std__path@^0.220.1",
+        "npm:@jsr/std__semver@^0.220.1"
       ]
     }
   }
