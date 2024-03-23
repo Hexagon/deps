@@ -6,30 +6,34 @@ export async function analyzeDependencies(
   denoLock: DenoLock | null,
   basePath: string,
 ): Promise<Package[] | null> {
-  // Get all config files
-  const denoConfigs = await readDenoConfig(basePath);
+  const imports = await getImportsFromConfig(basePath);
 
-  // Require at least one config file, use the first
-  const firstConfigFile = denoConfigs.find((configFile) => configFile.imports);
-  if (!firstConfigFile) {
+  if (!imports) {
     return null;
+  }
 
-    // Ready to go
-  } else {
-    // Download metadata for all packages
-    const importsClause = firstConfigFile?.imports;
-    if (importsClause) {
-      const packages = Object.values(importsClause).map(async (
-        entry: string,
-      ) => {
-        const p = new Package(entry);
-        if (denoLock) p.addDenoLockfile(denoLock);
-        await p.analyze();
-        return p;
-      });
-      return await Promise.all(packages);
-    } else {
-      return [];
+  const packages = imports.map(async (entry: string) => {
+    const p = new Package(entry);
+    if (denoLock) p.addDenoLockfile(denoLock);
+    await p.analyze();
+    return p;
+  });
+
+  return await Promise.all(packages);
+}
+
+async function getImportsFromConfig(
+  basePath: string,
+): Promise<string[] | null> {
+  try {
+    const denoConfigs = await readDenoConfig(basePath);
+    const configWithImports = denoConfigs.find((config) => config.imports);
+    if (!configWithImports || !configWithImports.imports) {
+      return null; // No imports found
     }
+    return Object.values(configWithImports.imports);
+  } catch (e) {
+    console.error("Error reading Deno configuration:", e);
+    return null;
   }
 }

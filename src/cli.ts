@@ -1,3 +1,13 @@
+/**
+ * This file contains the CLI logic for @check/deps.
+ *
+ * It's responsible for:
+ *  * Argument parsing
+ *  * Output formatting (table and summary stats)
+ *  * Error handling
+ *  * Colorization of output
+ */
+
 import { default as denoJson } from "../deno.json" with { type: "json" };
 import { args, ArgsParser, Colors, exit } from "@cross/utils";
 import { table } from "@cross/utils/table";
@@ -14,9 +24,9 @@ export function printHelpAndExit() {
   );
   console.log("Options:");
   console.log("  --help            Show this help message");
-  console.log("  --cwd <dir>       Set the working directory");
+  console.log("  --target <dir>    Set the target project path");
   console.log("  --slim            Suppress table output");
-  console.log("  --ignore-unused   Don't report on unused packages");
+  console.log("  --allow-unused    Don't report on unused packages");
 }
 
 export const colorSchemes = {
@@ -27,22 +37,34 @@ export const colorSchemes = {
   builtin: Colors.green,
 };
 
-export function updateStatusText(p: Package, ignoreUnused: boolean): string {
+/**
+ * Formats and returns a descriptive text string representing a package's status
+ * (outdated, unused, etc.)
+ * @param p The Package object to analyze
+ * @param allowUnused If true, unused packages will not be highlighted in the text
+ * @returns A formatted string representing the package's state
+ */
+function packageStatusText(p: Package, allowUnused: boolean): string {
   let text = "";
   if (p.isOutdated()) text += colorSchemes.outdated("Outdated ");
   if (p.isUpToDate()) text += colorSchemes.upToDate("Up-to-date ");
   if (!p.isSupported()) text += colorSchemes.unsupported("Unsupported ");
   if (p.isBuiltIn()) text += colorSchemes.builtin("Built-in ");
-  if (p.isUnused() && !ignoreUnused) text += colorSchemes.unused(`Unused `);
+  if (p.isUnused() && !allowUnused) text += colorSchemes.unused(`Unused `);
   return text;
 }
 
-export function printTable(packages: Package[], ignoreUnused: boolean) {
+/**
+ * Prints a tabular representation of the provided packages.
+ * @param packages An array of Package objects
+ * @param allowUnused If true, unused packages will be included without warnings
+ */
+export function printTable(packages: Package[], allowUnused: boolean) {
   const tableData = packages?.map((p) => [
     `${p.registry}:${p.name}${(p.specifier ? ("@" + p.specifier) : "")}`,
     p.wanted || "",
     p.latest || "",
-    updateStatusText(p, ignoreUnused),
+    packageStatusText(p, allowUnused),
   ]);
 
   tableData?.unshift([
@@ -63,10 +85,10 @@ export function printTable(packages: Package[], ignoreUnused: boolean) {
 export function printStatsAndExit(
   statusCounts: UpdateStatistics,
   slim: boolean,
-  ignoreUnused: boolean,
+  allowUnused: boolean,
 ) {
   const sumNotOk = statusCounts.outdated +
-    (ignoreUnused ? 0 : statusCounts.unused);
+    (allowUnused ? 0 : statusCounts.unused);
 
   // Message if all dependencies are up-to-date
   if (sumNotOk === 0) {
@@ -78,7 +100,7 @@ export function printStatsAndExit(
     if (statusCounts.outdated > 0) {
       statusText += Colors.yellow("Updates available. ");
     }
-    if (statusCounts.unused > 0 && !ignoreUnused) {
+    if (statusCounts.unused > 0 && !allowUnused) {
       statusText += Colors.yellow("Unused packages found. ");
     }
     console.log(statusText);
@@ -94,5 +116,5 @@ export function printErrorAndExit(e: Error) {
 
 export function printSuccessAndExit(message: string) {
   console.error(Colors.green(message));
-  exit(1);
+  exit(0);
 }

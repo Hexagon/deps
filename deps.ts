@@ -23,35 +23,42 @@ if (parsedArgs.count("help")) {
 // Entry point
 let packages: Package[] | null = null;
 let lockFile: DenoLock | null = null;
-try {
-  const workingDir = parsedArgs.get("cwd");
-  if (workingDir === true) {
-    printErrorAndExit(new Error("--cwd passed without a path"));
-  }
-  lockFile = await tryReadJsoncFile(
-    getDenoLockPath(workingDir as string | undefined || ""),
-  );
 
+const targetPath = parsedArgs.get("cwd");
+if (targetPath === true) {
+  printErrorAndExit(new Error("--target passed without a path"));
+}
+
+// Read lockfile
+try {
+  lockFile = await tryReadJsoncFile(
+    getDenoLockPath(targetPath as string | undefined || ""),
+  );
+} catch (_e) {
+  // Ignore, lock file really not needed
+}
+
+// Analyze the dependencies, exit on error
+try {
   packages = await analyzeDependencies(
     lockFile,
-    workingDir as string | undefined || "",
+    targetPath as string | undefined || "",
   );
 } catch (e) {
-  console.log(e);
-  printErrorAndExit(e.message);
+  printErrorAndExit(e);
 }
 
 // Automatically set ignore
-const ignoreUnused = parsedArgs.count("ignore-unused") > 0 || !lockFile;
+const allowUnused = parsedArgs.count("allow-unused") > 0 || !lockFile;
 
 // If packages were found
 if (packages) {
   // If not silent, print table
   if (!parsedArgs.count("slim") && packages) {
-    printTable(packages, ignoreUnused);
+    printTable(packages, allowUnused);
   }
 
-  printStatsAndExit(stats(packages), !!parsedArgs.count("slim"), ignoreUnused);
+  printStatsAndExit(stats(packages), !!parsedArgs.count("slim"), allowUnused);
 
   // If no packages were found
 } else {
