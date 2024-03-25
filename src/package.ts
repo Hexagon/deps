@@ -3,6 +3,9 @@ import { fetchJsrPackageMeta, JsrPackageMeta } from "./jsr.ts";
 import { DenoLock } from "./lockfile.ts";
 import { format, maxSatisfying, parse, parseRange } from "@std/semver";
 
+/**
+ * An enumeration of supported (and unsupported) package registries.
+ */
 export type PackageRegistry =
   | "jsr"
   | "npm"
@@ -12,6 +15,9 @@ export type PackageRegistry =
   | "bun"
   | "local";
 
+/**
+ * Represents a single external package dependency.
+ */
 export class Package {
   // Set by constructor
   public registry: PackageRegistry;
@@ -25,6 +31,10 @@ export class Package {
   public available: string[]; // set by fetchInfoFromMeta
   public wanted: string | null = null; // set by analyze
 
+  /**
+   * Creates a new Package instance.
+   * @param identifier - The package identifier string.
+   */
   constructor(identifier: string) {
     this.registry = guessRegistry(identifier);
     this.identifier = identifier;
@@ -33,6 +43,11 @@ export class Package {
     this.specifier = extractVersion(identifier);
   }
 
+  /**
+   * Fetches package metadata from the relevant registry.
+   * @private
+   * @returns True if metadata was successfully fetched, false otherwise.
+   */
   private async fetchInfoFromMeta(): Promise<boolean> {
     if (this.registry == "jsr") {
       const meta: JsrPackageMeta | null = await fetchJsrPackageMeta(this.name);
@@ -69,6 +84,12 @@ export class Package {
     return null;
   }
 
+  /**
+   * Fetches metadata about the package from the appropriate registry and determines the ideal
+   * version to install based on the specifier.
+   *
+   * @returns True if the analysis was successful, false otherwise.
+   */
   async analyze(): Promise<boolean> {
     if (!await this.fetchInfoFromMeta()) {
       return false;
@@ -114,6 +135,12 @@ export class Package {
   }
 }
 
+/**
+ * Internal helper to etermine the appropriate package registry based on the identifier.
+ *
+ * @param identifier - The package identifier string.
+ * @returns The corresponding package registry.
+ */
 function guessRegistry(identifier: string): PackageRegistry {
   if (identifier.startsWith("jsr:@")) {
     return "jsr";
