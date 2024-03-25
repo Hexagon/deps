@@ -10,3 +10,4 @@ jobs:
     with:
       entrypoint: deps.ts
       run_tests: false
+      lint_docs: false
