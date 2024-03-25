@@ -24,8 +24,8 @@ if (parsedArgs.count("help")) {
 let packages: Package[] | null = null;
 let lockFile: DenoLock | null = null;
 
-const targetPath = parsedArgs.get("cwd");
-if (targetPath === true) {
+const targetPath = parsedArgs.get("target");
+if (targetPath?.toString() === "true") {
   printErrorAndExit(new Error("--target passed without a path"));
 }
 

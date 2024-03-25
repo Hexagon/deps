@@ -8,6 +8,6 @@ export interface DenoLock {
   packages?: DenoPackages;
 }
 
-export function getDenoLockPath(workingDir: string) {
+export function getDenoLockPath(workingDir: string): string {
   return join(workingDir, "deno.lock");
 }

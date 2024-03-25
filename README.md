@@ -3,7 +3,7 @@
 Simple tool to check `deno.json`, `deno.jsonc`, `jsr.json` or `jsr.jsonc` for
 outdated dependencies.
 
-**Usage**
+## Command Line Usage
 
 ```bash
 deno run -A jsr:@check/deps [options]
@@ -13,18 +13,18 @@ This will cache the current version locally on subsequent runs. Append the
 refresh-flag `-r` to update to the latest version of @check/deps:
 
 ```bash
-deno run -fA jsr:@check/deps [options]
+deno run -rA jsr:@check/deps [options]
 ```
 
-**Options**
+### Options
 
 - `--help`: Display usage instructions.
 - `--target  <dir>`: Set the target project path (defaults to current
   directory).
 - `--slim`: Suppress table output for streamlined integration.
-- `--ignore-unused`: Don't report on unused packages.
+- `--allow-unused`: Don't report on unused packages.
 
-**Example Output**
+### Example Output
 
 ```
 ➜  deno run -A jsr:@check/deps
@@ -42,9 +42,10 @@ npm:mrmime@2.0.0             2.0.0      2.0.0      Up-to-date
 Updates available.
 ```
 
-**Project Integration (example)**
+## Usage with Deno Tasks
 
-Add a script to your `deno.json` for convenience:
+To check your dependencies with a Deno Task, such as `deno task check-deps`,
+modify your deno.json as outlined below:
 
 ```json
 "tasks": {
@@ -52,8 +53,54 @@ Add a script to your `deno.json` for convenience:
 }
 ```
 
-Then run
+## Usage with GitHub Actions
 
+To check JSR dependencies automatically using a GitHub action, add one of the
+following steps to your existing Deno workflow:
+
+Check and display a warning if dependencies are out of date, but let the
+workflow complete successfully.
+
+```yaml
+- name: Check Dependencies
+  continue-on-error: true
+  run: deno run -A jsr:@check/deps || echo "::warning title=Dependency Check::Some of the dependencies are out of date, please check."
 ```
-deno task check-deps
+
+Check and make the workflow fail if dependencies are out of date.
+
+```yaml
+- name: Check Dependencies
+  run: deno run -A jsr:@check/deps
+```
+
+Full example, failing on oudated dependencies:
+
+```yaml
+name: Deno CI
+
+on: 
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Run linter
+        run: deno lint
+
+      - name: Check Dependencies
+        run: deno run -A jsr:@check/deps
 ```

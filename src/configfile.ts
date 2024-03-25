@@ -2,6 +2,8 @@ import { join } from "@std/path";
 import { tryReadJsoncFile } from "./utils.ts";
 
 export interface DenoJson {
+  name?: string;
+  version?: string;
   imports?: string[];
 }
 

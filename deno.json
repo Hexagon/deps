@@ -1,9 +1,12 @@
 {
   "name": "@check/deps",
-  "version": "0.2.1",
-  "exports": "./deps.ts",
+  "version": "0.3.0",
+  "exports": {
+    ".": "./deps.ts",
+    "./lib": "./lib.ts"
+  },
   "imports": {
-    "@cross/utils": "jsr:@cross/utils@^0.7.0",
+    "@cross/utils": "jsr:@cross/utils@^0.8.2",
     "@std/jsonc": "jsr:@std/jsonc@^0.220.1",
     "@std/path": "jsr:@std/path@^0.220.1",
     "@std/semver": "jsr:@std/semver@^0.220.1"
@@ -12,7 +15,7 @@
     "exclude": [".github"]
   },
   "tasks": {
-    "check": "deno fmt --check && deno lint && deno check deps.ts && deno doc --lint deps.ts && deno run -A deps.ts --slim --ignore-unused",
+    "check": "deno fmt --check && deno lint && deno check deps.ts && deno doc --lint deps.ts && deno run -A deps.ts --slim --allow-unused",
     "check-deps": "deno run -A deps.ts"
   }
 }

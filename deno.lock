@@ -3,7 +3,7 @@
   "packages": {
     "specifiers": {
       "jsr:@cross/runtime@^1.0.0": "jsr:@cross/runtime@1.0.0",
-      "jsr:@cross/utils@^0.7.0": "jsr:@cross/utils@0.7.0",
+      "jsr:@cross/utils@^0.8.2": "jsr:@cross/utils@0.8.2",
       "jsr:@std/assert@^0.220.1": "jsr:@std/assert@0.220.1",
       "jsr:@std/json@^0.220.1": "jsr:@std/json@0.220.1",
       "jsr:@std/jsonc@^0.220.1": "jsr:@std/jsonc@0.220.1",
@@ -14,8 +14,8 @@
       "@cross/runtime@1.0.0": {
         "integrity": "dddecdf99182df13d50279d1e473f715e83d41961c5c22edd7bb0c4c3cf8a76a"
       },
-      "@cross/utils@0.7.0": {
-        "integrity": "c03726c5cf34862e03d85ed444d5175ec3c8f26cd6ac1be080187acb865f6ff0",
+      "@cross/utils@0.8.2": {
+        "integrity": "be80b2100cb9db3d8a28de73e1e85f9bbbee21a13ae2842d783bf2e1401dbfa2",
         "dependencies": [
           "jsr:@cross/runtime@^1.0.0"
         ]
@@ -47,7 +47,7 @@
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@cross/utils@^0.7.0",
+      "jsr:@cross/utils@^0.8.2",
       "jsr:@std/jsonc@^0.220.1",
       "jsr:@std/path@^0.220.1",
       "jsr:@std/semver@^0.220.1"
