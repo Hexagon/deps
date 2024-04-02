@@ -15,6 +15,6 @@
   },
   "tasks": {
     "check": "deno fmt --check && deno lint && deno check deps.ts && deno doc --lint deps.ts && deno run -A deps.ts --slim --allow-unused",
-    "check-deps": "deno run -A deps.ts"
+    "check-deps": "deno run --allow-read=. --allow-net=jsr.io,registry.npmjs.org jsr:@check/deps"
   }
 }

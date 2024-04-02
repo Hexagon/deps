@@ -9,12 +9,29 @@ outdated dependencies.
 deno run -A jsr:@check/deps [options]
 ```
 
-This will cache the current version locally on subsequent runs. Append the
-refresh-flag `-r` to update to the latest version of @check/deps:
+> [!IMPORTANT]
+> Replace `-A` (all permissions) with `--allow-read=. --allow-net=jsr.io,registry.npmjs.org` to make full use of Deno's security model:
+> 
+> ```bash
+> deno run --allow-read=. --allow-net=jsr.io,registry.npmjs.org jsr:@check/deps
+> ```
 
-```bash
-deno run -rA jsr:@check/deps [options]
-```
+> [!TIP]
+> This will cache the current version locally on subsequent runs. Append the
+> refresh-flag `-r` to update to the latest version of @check/deps:
+> 
+> ```bash
+> deno run -rA jsr:@check/deps [options]
+> ```
+
+> [!TIP]
+> You can install check/deps as a command, below using minimum permissions and the cli name `check-deps`
+> 
+> ```bash
+> deno install -n check-deps -r --allow-read=. --allow-net=jsr.io,registry.npmjs.org jsr:@check/deps jsr:@check/deps
+> ```
+> 
+> Now you can run `check-deps` directly at the command line.
 
 ### Options
 
