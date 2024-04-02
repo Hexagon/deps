@@ -4,6 +4,9 @@
   "exports": {
     ".": "./deps.ts"
   },
+  "fmt": {
+    "exclude": ["README.md"]
+  },
   "imports": {
     "@cross/utils": "jsr:@cross/utils@^0.8.2",
     "@std/jsonc": "jsr:@std/jsonc@^0.220.1",
