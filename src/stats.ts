@@ -5,6 +5,7 @@ export interface UpdateStatistics {
   unused: number;
   upToDate: number;
   unsupported: number;
+  prerelease: number;
 }
 
 export function stats(
@@ -15,9 +16,11 @@ export function stats(
     unused: 0,
     upToDate: 0,
     unsupported: 0,
+    prerelease: 0,
   };
 
   packages.forEach((update) => {
+    if (update.isPreRelease()) statusCounts.prerelease++;
     if (update.isOutdated()) statusCounts.outdated++;
     if (update.isUnused()) statusCounts.unused++;
     if (update.isUpToDate()) statusCounts.upToDate++;

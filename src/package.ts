@@ -1,7 +1,13 @@
 import { fetchNpmPackageMeta, NpmPackageMeta } from "./npm.ts";
 import { fetchJsrPackageMeta, JsrPackageMeta } from "./jsr.ts";
 import { DenoLock } from "./lockfile.ts";
-import { format, maxSatisfying, parse, parseRange } from "@std/semver";
+import {
+  format,
+  greaterThan,
+  maxSatisfying,
+  parse,
+  parseRange,
+} from "@std/semver";
 
 /**
  * An enumeration of supported (and unsupported) package registries.
@@ -113,8 +119,20 @@ export class Package {
     return false;
   }
 
+  /** Returns true if this is a pre-release later than latest */
+  isPreRelease(): boolean {
+    const currentOrWanted = this.current || this.wanted;
+    if (!currentOrWanted || !this.latest) return false;
+
+    const parsedCurrent = parse(currentOrWanted);
+    const parsedLatest = parse(this.latest);
+
+    if (!parsedCurrent || !parsedLatest) return false; // Handle invalid versions
+    return greaterThan(parsedCurrent, parsedLatest);
+  }
+
   isOutdated(): boolean {
-    return this.wanted != this.latest;
+    return this.wanted != this.latest && !this.isPreRelease();
   }
 
   isUpToDate(): boolean {

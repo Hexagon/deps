@@ -35,6 +35,7 @@ export const colorSchemes = {
   upToDate: Colors.green,
   unsupported: Colors.dim,
   builtin: Colors.green,
+  prerelease: Colors.yellow,
 };
 
 /**
@@ -47,7 +48,10 @@ export const colorSchemes = {
 function packageStatusText(p: Package, allowUnused: boolean): string {
   let text = "";
   if (p.isOutdated()) text += colorSchemes.outdated("Outdated ");
-  if (p.isUpToDate()) text += colorSchemes.upToDate("Up-to-date ");
+  if (p.isPreRelease()) text += colorSchemes.prerelease("Pre-Release ");
+  if (p.isUpToDate() && !p.isPreRelease()) {
+    text += colorSchemes.upToDate("Up-to-date ");
+  }
   if (!p.isSupported()) text += colorSchemes.unsupported("Unsupported ");
   if (p.isBuiltIn()) text += colorSchemes.builtin("Built-in ");
   if (p.isUnused() && !allowUnused) text += colorSchemes.unused(`Unused `);
