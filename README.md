@@ -43,6 +43,7 @@ deno run -A jsr:@check/deps [options]
   directory).
 - `--slim`: Suppress table output for streamlined integration.
 - `--allow-unused`: Don't report on unused packages.
+- `--pre-release`: Treat latest (accoring to semver) pre-release as the wanted version.
 
 ### Example Output
 

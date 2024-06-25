@@ -1,4 +1,4 @@
-import { Package } from "./package.ts";
+import type { Package } from "./package.ts";
 
 export interface UpdateStatistics {
   outdated: number;

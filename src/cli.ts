@@ -11,8 +11,8 @@
 import { default as denoJson } from "../deno.json" with { type: "json" };
 import { args, ArgsParser, Colors, exit } from "@cross/utils";
 import { table } from "@cross/utils/table";
-import { UpdateStatistics } from "./stats.ts";
-import { Package } from "./package.ts";
+import type { UpdateStatistics } from "./stats.ts";
+import type { Package } from "./package.ts";
 
 export function parseArgs() {
   return new ArgsParser(args());
@@ -26,6 +26,7 @@ export function printHelpAndExit() {
   console.log("  --help            Show this help message");
   console.log("  --target <dir>    Set the target project path");
   console.log("  --slim            Suppress table output");
+  console.log("  --pre-release     Treat latest pre-release as latest");
   console.log("  --allow-unused    Don't report on unused packages");
 }
 
@@ -45,10 +46,18 @@ export const colorSchemes = {
  * @param allowUnused If true, unused packages will not be highlighted in the text
  * @returns A formatted string representing the package's state
  */
-function packageStatusText(p: Package, allowUnused: boolean): string {
+function packageStatusText(
+  p: Package,
+  allowUnused: boolean,
+  preRelease: boolean,
+): string {
   let text = "";
   if (p.isOutdated()) text += colorSchemes.outdated("Outdated ");
-  if (p.isPreRelease()) text += colorSchemes.prerelease("Pre-Release ");
+  if (p.isPreRelease()) {
+    text += preRelease
+      ? colorSchemes.prerelease("Pre-Release ")
+      : colorSchemes.upToDate("Up-to-date (Pre-Release) ");
+  }
   if (p.isUpToDate() && !p.isPreRelease()) {
     text += colorSchemes.upToDate("Up-to-date ");
   }
@@ -62,13 +71,18 @@ function packageStatusText(p: Package, allowUnused: boolean): string {
  * Prints a tabular representation of the provided packages.
  * @param packages An array of Package objects
  * @param allowUnused If true, unused packages will be included without warnings
+ * @param preRelease Treat pre-releases as latest
  */
-export function printTable(packages: Package[], allowUnused: boolean) {
+export function printTable(
+  packages: Package[],
+  allowUnused: boolean,
+  preRelease: boolean,
+) {
   const tableData = packages?.map((p) => [
     `${p.registry}:${p.name}${(p.specifier ? ("@" + p.specifier) : "")}`,
     p.wanted || "",
     p.latest || "",
-    packageStatusText(p, allowUnused),
+    packageStatusText(p, allowUnused, preRelease),
   ]);
 
   tableData?.unshift([

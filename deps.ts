@@ -8,9 +8,9 @@ import {
 } from "./src/cli.ts";
 import { tryReadJsoncFile } from "./src/utils.ts";
 import { stats } from "./src/stats.ts";
-import { DenoLock, getDenoLockPath } from "./src/lockfile.ts";
+import { type DenoLock, getDenoLockPath } from "./src/lockfile.ts";
 import { analyzeDependencies } from "./src/analyzer.ts";
-import { Package } from "./src/package.ts";
+import type { Package } from "./src/package.ts";
 
 async function main() {
   // Parse arguments
@@ -39,11 +39,15 @@ async function main() {
     // Ignore, lock file really not needed
   }
 
+  // Treat pre-releases as latest
+  const preRelease = parsedArgs.count("pre-release") > 0;
+
   // Analyze the dependencies, exit on error
   try {
     packages = await analyzeDependencies(
       lockFile,
       targetPath as string | undefined || "",
+      preRelease,
     );
   } catch (e) {
     printErrorAndExit(e);
@@ -56,7 +60,7 @@ async function main() {
   if (packages) {
     // If not silent, print table
     if (!parsedArgs.count("slim") && packages) {
-      printTable(packages, allowUnused);
+      printTable(packages, allowUnused, preRelease);
     }
 
     printStatsAndExit(stats(packages), !!parsedArgs.count("slim"), allowUnused);

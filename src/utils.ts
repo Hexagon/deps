@@ -1,5 +1,8 @@
 import { parse as parseJsonc } from "@std/jsonc";
 
+/**
+ * Read json file or return null on error
+ */
 export async function tryReadJsoncFile<T>(
   filename: string,
 ): Promise<T | null> {

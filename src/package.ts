@@ -1,6 +1,6 @@
-import { fetchNpmPackageMeta, NpmPackageMeta } from "./npm.ts";
-import { fetchJsrPackageMeta, JsrPackageMeta } from "./jsr.ts";
-import { DenoLock } from "./lockfile.ts";
+import { fetchNpmPackageMeta, type NpmPackageMeta } from "./npm.ts";
+import { fetchJsrPackageMeta, type JsrPackageMeta } from "./jsr.ts";
+import type { DenoLock } from "./lockfile.ts";
 import {
   format,
   greaterThan,
@@ -26,16 +26,24 @@ export type PackageRegistry =
  */
 export class Package {
   // Set by constructor
+  /** The package registry */
   public registry: PackageRegistry;
+  /** The full package identifier */
   public identifier: string;
+  /** The package name */
   public name: string;
+  /** The package specifier (e.g. `jsr:`, `npm:`, `node:` ...) */
   public specifier: string | null;
 
   // Additional data
-  public current: string | null = null; // set by addDenoLockfile
-  public latest: string | null = null; // set by fetchInfoFromMeta
-  public available: string[]; // set by fetchInfoFromMeta
-  public wanted: string | null = null; // set by analyze
+  /** set by addDenoLockfile */
+  public current: string | null = null;
+  /** set by fetchInfoFromMeta */
+  public latest: string | null = null;
+  /** set by fetchInfoFromMeta */
+  public available: string[];
+  /** set by analyze */
+  public wanted: string | null = null;
 
   /**
    * Creates a new Package instance.
@@ -73,6 +81,9 @@ export class Package {
     return false;
   }
 
+  /**
+   * Adds information from the deno lock file (`deno.lock`)
+   */
   addDenoLockfile(
     denoLock: DenoLock | null,
   ): string | null {
@@ -94,9 +105,11 @@ export class Package {
    * Fetches metadata about the package from the appropriate registry and determines the ideal
    * version to install based on the specifier.
    *
+   * @param preRelease Treat pre-releases as latest
+   *
    * @returns True if the analysis was successful, false otherwise.
    */
-  async analyze(): Promise<boolean> {
+  async analyze(preRelease: boolean): Promise<boolean> {
     if (!await this.fetchInfoFromMeta()) {
       return false;
     }
@@ -108,10 +121,18 @@ export class Package {
     }
 
     if (this.specifier) {
-      const latestMatching = maxSatisfying(
-        versions,
-        parseRange(this.specifier),
-      );
+      let latestMatching;
+      if (preRelease && versions.length > 0) {
+        latestMatching = versions
+          .sort((v1, v2) => {
+            return greaterThan(v1, v2) ? -1 : 1;
+          })[0];
+      } else {
+        latestMatching = maxSatisfying(
+          versions,
+          parseRange(this.specifier),
+        );
+      }
       this.wanted = latestMatching ? format(latestMatching) : null;
       return true;
     }
@@ -131,22 +152,33 @@ export class Package {
     return greaterThan(parsedCurrent, parsedLatest);
   }
 
+  /** Checks if the current package is outdated */
   isOutdated(): boolean {
     return this.wanted != this.latest && !this.isPreRelease();
   }
 
+  /** Checks if the current package is supported and up to date */
   isUpToDate(): boolean {
     return this.isSupported() && !this.isOutdated();
   }
 
+  /**
+   * Checks if the registry (specifier) is supported, returns true for `jsr:` and `npm:`, false otherwise.
+   */
   isSupported(): boolean {
     return this.registry == "jsr" || this.registry == "npm";
   }
 
+  /**
+   * Checks if the current package is unused
+   */
   isUnused(): boolean {
     return this.current ? false : true;
   }
 
+  /**
+   * Check if the current package is a built in package of Deno, Node or Bun.
+   */
   isBuiltIn(): boolean {
     return this.registry == "deno" || this.registry == "node" ||
       this.registry == "bun";

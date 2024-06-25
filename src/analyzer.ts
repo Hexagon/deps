@@ -1,10 +1,11 @@
 import { readDenoConfig } from "./configfile.ts";
-import { DenoLock } from "./lockfile.ts";
+import type { DenoLock } from "./lockfile.ts";
 import { Package } from "./package.ts";
 
 export async function analyzeDependencies(
   denoLock: DenoLock | null,
   basePath: string,
+  preRelease: boolean,
 ): Promise<Package[] | null> {
   const imports = await getImportsFromConfig(basePath);
 
@@ -15,7 +16,7 @@ export async function analyzeDependencies(
   const packages = imports.map(async (entry: string) => {
     const p = new Package(entry);
     if (denoLock) p.addDenoLockfile(denoLock);
-    await p.analyze();
+    await p.analyze(preRelease);
     return p;
   });
 
