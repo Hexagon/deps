@@ -95,6 +95,15 @@ export class Package {
       const matchingEntries = Object.entries(denoLock?.packages?.specifiers)
         .filter(([_, val]) => (val as string || "").includes(this.name));
       if (matchingEntries.length > 0) {
+        // Sort matching entries descending by semver
+        matchingEntries.sort((v1, v2) =>
+          greaterThan(
+              parse(extractVersion(v1[1])!),
+              parse(extractVersion(v2[1])!),
+            )
+            ? -1
+            : 1
+        );
         this.current = extractVersion(matchingEntries[0][1]);
       }
     }
@@ -127,6 +136,7 @@ export class Package {
           .sort((v1, v2) => {
             return greaterThan(v1, v2) ? -1 : 1;
           })[0];
+        this.latest = format(latestMatching);
       } else {
         latestMatching = maxSatisfying(
           versions,

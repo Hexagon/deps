@@ -1,6 +1,6 @@
 {
   "name": "@check/deps",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "exports": {
     ".": "./deps.ts"
   },
@@ -10,7 +10,7 @@
   "imports": {
     "@cross/utils": "jsr:@cross/utils@^0.13.0",
     "@std/jsonc": "jsr:@std/jsonc@^0.224.3",
-    "@std/path": "jsr:@std/path@^0.225.2",
+    "@std/path": "jsr:@std/path@^1.0.0-rc.2",
     "@std/semver": "jsr:@std/semver@^0.224.3"
   },
   "publish": {

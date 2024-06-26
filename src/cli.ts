@@ -49,14 +49,11 @@ export const colorSchemes = {
 function packageStatusText(
   p: Package,
   allowUnused: boolean,
-  preRelease: boolean,
 ): string {
   let text = "";
   if (p.isOutdated()) text += colorSchemes.outdated("Outdated ");
   if (p.isPreRelease()) {
-    text += preRelease
-      ? colorSchemes.prerelease("Pre-Release ")
-      : colorSchemes.upToDate("Up-to-date (Pre-Release) ");
+    text += colorSchemes.prerelease("Up-to-date (Pre-Release) ");
   }
   if (p.isUpToDate() && !p.isPreRelease()) {
     text += colorSchemes.upToDate("Up-to-date ");
@@ -71,18 +68,16 @@ function packageStatusText(
  * Prints a tabular representation of the provided packages.
  * @param packages An array of Package objects
  * @param allowUnused If true, unused packages will be included without warnings
- * @param preRelease Treat pre-releases as latest
  */
 export function printTable(
   packages: Package[],
   allowUnused: boolean,
-  preRelease: boolean,
 ) {
   const tableData = packages?.map((p) => [
     `${p.registry}:${p.name}${(p.specifier ? ("@" + p.specifier) : "")}`,
     p.wanted || "",
     p.latest || "",
-    packageStatusText(p, allowUnused, preRelease),
+    packageStatusText(p, allowUnused),
   ]);
 
   tableData?.unshift([

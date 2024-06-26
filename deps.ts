@@ -60,7 +60,7 @@ async function main() {
   if (packages) {
     // If not silent, print table
     if (!parsedArgs.count("slim") && packages) {
-      printTable(packages, allowUnused, preRelease);
+      printTable(packages, allowUnused);
     }
 
     printStatsAndExit(stats(packages), !!parsedArgs.count("slim"), allowUnused);
