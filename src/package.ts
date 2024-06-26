@@ -130,19 +130,18 @@ export class Package {
     }
 
     if (this.specifier) {
-      let latestMatching;
+      // Update latest if prereleases are requested
       if (preRelease && versions.length > 0) {
-        latestMatching = versions
+        const absolutelyLatest = versions
           .sort((v1, v2) => {
             return greaterThan(v1, v2) ? -1 : 1;
           })[0];
-        this.latest = format(latestMatching);
-      } else {
-        latestMatching = maxSatisfying(
-          versions,
-          parseRange(this.specifier),
-        );
+        this.latest = format(absolutelyLatest);
       }
+      const latestMatching = maxSatisfying(
+        versions,
+        parseRange(this.specifier),
+      );
       this.wanted = latestMatching ? format(latestMatching) : null;
       return true;
     }
