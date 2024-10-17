@@ -1,5 +1,9 @@
 import { fetchNpmPackageMeta, type NpmPackageMeta } from "./npm.ts";
 import { fetchJsrPackageMeta, type JsrPackageMeta } from "./jsr.ts";
+import {
+  type DenolandPackageMeta,
+  fetchDenolandPackageMeta,
+} from "./denoland.ts";
 import type { DenoLock } from "./lockfile.ts";
 import {
   format,
@@ -16,6 +20,7 @@ export type PackageRegistry =
   | "jsr"
   | "npm"
   | "https"
+  | "denoland"
   | "deno"
   | "node"
   | "bun"
@@ -53,8 +58,24 @@ export class Package {
     this.registry = guessRegistry(identifier);
     this.identifier = identifier;
     this.available = [];
-    this.name = extractPackageName(identifier);
-    this.specifier = extractVersion(identifier);
+    this.name = extractPackageName(this.cleanIdentifier(identifier));
+    this.specifier = extractVersion(this.cleanIdentifier(identifier));
+  }
+
+  cleanIdentifier(identifier: string): string {
+    if (this.registry === "denoland") {
+      try {
+        const url = new URL(identifier);
+        if (url.hostname === "deno.land") {
+          const pathnameParts = url.pathname.split("/");
+          const packageName = pathnameParts[2];
+          return `${packageName}`;
+        }
+      } catch (_error) {
+        // Ignore invalid URLs
+      }
+    }
+    return identifier; // Return the original identifier if not deno.land
   }
 
   /**
@@ -67,14 +88,25 @@ export class Package {
       const meta: JsrPackageMeta | null = await fetchJsrPackageMeta(this.name);
       if (meta) {
         this.latest = meta.latest;
-        this.available = Object.keys(meta.versions);
+        this.available = filterValidVersions(Object.keys(meta.versions));
         return true;
       }
     } else if (this.registry == "npm") {
       const meta: NpmPackageMeta | null = await fetchNpmPackageMeta(this.name);
       if (meta) {
         this.latest = meta["dist-tags"].latest;
-        this.available = Object.keys(meta.versions);
+        this.available = filterValidVersions(Object.keys(meta.versions));
+        return true;
+      }
+    } else if (this.registry == "denoland") {
+      const meta: DenolandPackageMeta | null = await fetchDenolandPackageMeta(
+        this.name,
+      );
+      if (meta) {
+        this.latest = meta.latest;
+        this.available = filterValidVersions(
+          meta.versions as unknown as string[],
+        );
         return true;
       }
     }
@@ -175,7 +207,8 @@ export class Package {
    * Checks if the registry (specifier) is supported, returns true for `jsr:` and `npm:`, false otherwise.
    */
   isSupported(): boolean {
-    return this.registry == "jsr" || this.registry == "npm";
+    return this.registry == "jsr" || this.registry == "npm" ||
+      this.registry == "denoland";
   }
 
   /**
@@ -205,6 +238,10 @@ function guessRegistry(identifier: string): PackageRegistry {
     return "jsr";
   } else if (identifier.startsWith("npm:")) {
     return "npm";
+  } else if (
+    identifier.startsWith("https://") && identifier.includes("deno.land")
+  ) {
+    return "denoland";
   } else if (identifier.startsWith("https://")) {
     return "https";
   } else if (identifier.startsWith("deno:")) {
@@ -249,4 +286,18 @@ function extractPackageName(packageString: string): string {
   }
   // 3. Other cases (assumed to be treated as the full package name)
   return `${hadAt ? "@" : ""}${packageString}`;
+}
+
+function filterValidVersions(versions: string[]): string[] {
+  return versions
+    .map((v) => {
+      try {
+        // Attempt to parse the version string
+        const parsedVersion = parse(v.replaceAll(",", "."));
+        return parsedVersion ? format(parsedVersion) : null; // Format if successful
+      } catch (error) {
+        return null; // Ignore parsing errors
+      }
+    })
+    .filter((v) => v !== null) as string[]; // Remove null values (failed parses)
 }
