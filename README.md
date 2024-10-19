@@ -3,6 +3,8 @@
 Simple tool to check `deno.json`, `deno.jsonc`, `jsr.json` or `jsr.jsonc` for
 outdated dependencies.
 
+Currently supports dependencies hosted at jsr, npm or deno.land/x.
+
 ## Command Line Usage
 
 ```bash

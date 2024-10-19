@@ -62,6 +62,11 @@ export class Package {
     this.specifier = extractVersion(this.cleanIdentifier(identifier));
   }
 
+  /**
+   * Cleans the package identifier, specifically handling deno.land URLs.
+   * @param identifier - The package identifier string.
+   * @returns The cleaned package identifier.
+   */
   cleanIdentifier(identifier: string): string {
     if (this.registry === "denoland") {
       try {
@@ -295,7 +300,7 @@ function filterValidVersions(versions: string[]): string[] {
         // Attempt to parse the version string
         const parsedVersion = parse(v.replaceAll(",", "."));
         return parsedVersion ? format(parsedVersion) : null; // Format if successful
-      } catch (error) {
+      } catch (_error) {
         return null; // Ignore parsing errors
       }
     })

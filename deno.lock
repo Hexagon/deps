@@ -4,14 +4,14 @@
     "jsr:@cross/deepmerge@1": "1.0.0",
     "jsr:@cross/env@1": "1.0.2",
     "jsr:@cross/fs@~0.1.11": "0.1.11",
-    "jsr:@cross/runtime@1": "1.0.0",
-    "jsr:@cross/utils@0.13": "0.13.0",
+    "jsr:@cross/runtime@1": "1.1.0",
+    "jsr:@cross/utils@0.16": "0.16.0",
     "jsr:@std/assert@0.224": "0.224.0",
-    "jsr:@std/json@^1.0.0-rc.1": "1.0.0-rc.1",
-    "jsr:@std/jsonc@~0.224.3": "0.224.3",
+    "jsr:@std/json@1": "1.0.0",
+    "jsr:@std/jsonc@^1.0.1": "1.0.1",
     "jsr:@std/path@0.224": "0.224.0",
     "jsr:@std/path@~1.0.0-rc.2": "1.0.0-rc.2",
-    "jsr:@std/semver@~0.224.3": "0.224.3",
+    "jsr:@std/semver@^1.0.3": "1.0.3",
     "npm:@types/node@*": "18.16.19"
   },
   "jsr": {
@@ -33,11 +33,11 @@
         "jsr:@std/path@0.224"
       ]
     },
-    "@cross/runtime@1.0.0": {
-      "integrity": "dddecdf99182df13d50279d1e473f715e83d41961c5c22edd7bb0c4c3cf8a76a"
+    "@cross/runtime@1.1.0": {
+      "integrity": "f35a3b768a9de125277329483b684062ffc9ee86f4449cb8b3d614adcad64ffb"
     },
-    "@cross/utils@0.13.0": {
-      "integrity": "566b240c4c92c7630aba2fb01c0cf51383e8bf537bea56bd44e01f7b4d9589ac",
+    "@cross/utils@0.16.0": {
+      "integrity": "c6333cafd9be41a04c449655120989b8f3601322f7344db30f9d00eef7bc942f",
       "dependencies": [
         "jsr:@cross/fs",
         "jsr:@cross/runtime"
@@ -46,11 +46,11 @@
     "@std/assert@0.224.0": {
       "integrity": "8643233ec7aec38a940a8264a6e3eed9bfa44e7a71cc6b3c8874213ff401967f"
     },
-    "@std/json@1.0.0-rc.1": {
-      "integrity": "14063cdc5ea3e2893e7ede348fc5c940299fcae9c3575f2f4f3f91e10e95d3c6"
+    "@std/json@1.0.0": {
+      "integrity": "985c1e544918d42e4e84072fc739ac4a19c3a5093292c99742ffcdd03fb6a268"
     },
-    "@std/jsonc@0.224.3": {
-      "integrity": "c10770a31489f5b85a3562d9b107c497666d8b6a49291ee2711d84da2616c2d6",
+    "@std/jsonc@1.0.1": {
+      "integrity": "6b36956e2a7cbb08ca5ad7fbec72e661e6217c202f348496ea88747636710dda",
       "dependencies": [
         "jsr:@std/json"
       ]
@@ -64,8 +64,8 @@
     "@std/path@1.0.0-rc.2": {
       "integrity": "39f20d37a44d1867abac8d91c169359ea6e942237a45a99ee1e091b32b921c7d"
     },
-    "@std/semver@0.224.3": {
-      "integrity": "7bb34b5ad46de2c0c73de0ca3e30081ef64b4361f66abd57c84ff1011c6a1233"
+    "@std/semver@1.0.3": {
+      "integrity": "7c139c6076a080eeaa4252c78b95ca5302818d7eafab0470d34cafd9930c13c8"
     }
   },
   "npm": {
@@ -111,14 +111,15 @@
     "https://deno.land/std@0.199.0/path/separator.ts": "0fb679739d0d1d7bf45b68dacfb4ec7563597a902edbaf3c59b50d5bcadd93b1",
     "https://deno.land/std@0.199.0/path/to_file_url.ts": "dd32f7a01bbf3b15b5df46796659984b372973d9b2d7d59bcf0eb990763a0cb5",
     "https://deno.land/std@0.199.0/path/to_namespaced_path.ts": "4e643ab729bf49ccdc166ad48d2de262ff462938fcf2a44a4425588f4a0bd690",
-    "https://deno.land/std@0.199.0/path/win32.ts": "8b3f80ef7a462511d5e8020ff490edcaa0a0d118f1b1e9da50e2916bdd73f9dd"
+    "https://deno.land/std@0.199.0/path/win32.ts": "8b3f80ef7a462511d5e8020ff490edcaa0a0d118f1b1e9da50e2916bdd73f9dd",
+    "https://deno.land/x/croner@8.1.0/dist/croner.js": "6190284e7caba448985490a2905e9def252ba2357e498a690683f51cc3f264d5"
   },
   "workspace": {
     "dependencies": [
-      "jsr:@cross/utils@0.13",
-      "jsr:@std/jsonc@~0.224.3",
+      "jsr:@cross/utils@0.16",
+      "jsr:@std/jsonc@^1.0.1",
       "jsr:@std/path@~1.0.0-rc.2",
-      "jsr:@std/semver@~0.224.3"
+      "jsr:@std/semver@^1.0.3"
     ]
   }
 }

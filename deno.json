@@ -8,11 +8,10 @@
     "exclude": ["README.md"]
   },
   "imports": {
-    "croner": "https://deno.land/x/croner@8.1.0/dist/croner.js",
-    "@cross/utils": "jsr:@cross/utils@^0.13.0",
-    "@std/jsonc": "jsr:@std/jsonc@^0.224.3",
+    "@cross/utils": "jsr:@cross/utils@^0.16.0",
+    "@std/jsonc": "jsr:@std/jsonc@^1.0.1",
     "@std/path": "jsr:@std/path@~1.0.0-rc.2",
-    "@std/semver": "jsr:@std/semver@^0.224.3"
+    "@std/semver": "jsr:@std/semver@^1.0.3"
   },
   "publish": {
     "exclude": [".github"]

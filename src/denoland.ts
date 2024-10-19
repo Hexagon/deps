@@ -20,7 +20,6 @@ export async function fetchDenolandPackageMeta(
   packageName: string,
 ): Promise<DenolandPackageMeta | null> {
   const url = `https://cdn.deno.land/${packageName}/meta/versions.json`;
-  console.log(url);
   const headers = new Headers({
     "Accept": "application/json",
     "User-Agent":

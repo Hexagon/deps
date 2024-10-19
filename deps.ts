@@ -50,7 +50,7 @@ async function main() {
       preRelease,
     );
   } catch (e) {
-    printErrorAndExit(e);
+    printErrorAndExit(e as Error);
   }
 
   // Automatically set ignore
