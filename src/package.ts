@@ -159,7 +159,7 @@ export class Package {
               ? -1
               : 1
           );
-          this.current = matchingEntries[0][1];
+          this.current = matchingEntries[0][1].split("_")[0];
         }
       } catch { /* Ignore non parseable versions */ }
     }
