@@ -1,9 +1,9 @@
 import { readDenoConfig } from "./configfile.ts";
-import type { DenoLock } from "./lockfile.ts";
+import type { DenoLock3, DenoPackages } from "./lockfile.ts";
 import { Package } from "./package.ts";
 
 export async function analyzeDependencies(
-  denoLock: DenoLock | null,
+  denoLock: DenoLock3 | DenoPackages | null,
   basePath: string,
   preRelease: boolean,
 ): Promise<Package[] | null> {

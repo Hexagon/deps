@@ -1,6 +1,6 @@
 {
   "name": "@check/deps",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "exports": {
     ".": "./deps.ts"
   },
@@ -8,7 +8,7 @@
     "exclude": ["README.md"]
   },
   "imports": {
-    "@cross/utils": "jsr:@cross/utils@^0.16.0",
+    "@cross/utils": "jsr:@cross/utils@~0.16.0",
     "@std/jsonc": "jsr:@std/jsonc@^1.0.1",
     "@std/path": "jsr:@std/path@~1.0.0-rc.2",
     "@std/semver": "jsr:@std/semver@^1.0.3"

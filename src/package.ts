@@ -4,7 +4,7 @@ import {
   type DenolandPackageMeta,
   fetchDenolandPackageMeta,
 } from "./denoland.ts";
-import type { DenoLock } from "./lockfile.ts";
+import type { DenoLock3, DenoPackages } from "./lockfile.ts";
 import {
   format,
   greaterThan,
@@ -122,26 +122,43 @@ export class Package {
    * Adds information from the deno lock file (`deno.lock`)
    */
   addDenoLockfile(
-    denoLock: DenoLock | null,
+    denoLock: DenoLock3 | DenoPackages | null,
   ): string | null {
+    let specifiers = null;
     if (
-      denoLock?.packages?.specifiers &&
-      typeof denoLock?.packages?.specifiers === "object"
+      (denoLock as DenoLock3)?.packages?.specifiers &&
+      typeof (denoLock as DenoLock3)?.packages?.specifiers === "object"
+    ) {
+      specifiers = (denoLock as DenoLock3)?.packages?.specifiers;
+    } else if (
+      (denoLock as DenoPackages)?.specifiers &&
+      typeof (denoLock as DenoPackages)?.specifiers === "object"
+    ) {
+      specifiers = (denoLock as DenoPackages)?.specifiers;
+    }
+    if (
+      specifiers && this.specifier !== null
     ) {
       // Filter for the matching package
-      const matchingEntries = Object.entries(denoLock?.packages?.specifiers)
-        .filter(([_, val]) => (val as string || "").includes(this.name));
+      let matchingEntries = Object.entries(specifiers)
+        .filter(([name, _]) =>
+          (name as string || "").includes(this.specifier!)
+        );
+      if (matchingEntries.length === 0) {
+        matchingEntries = Object.entries(specifiers)
+          .filter(([name, _]) => (name as string || "").includes(this.name));
+      }
       if (matchingEntries.length > 0) {
         // Sort matching entries descending by semver
         matchingEntries.sort((v1, v2) =>
           greaterThan(
-              parse(extractVersion(v1[1])!),
-              parse(extractVersion(v2[1])!),
+              parse(v1[1]!),
+              parse(v2[1]!),
             )
             ? -1
             : 1
         );
-        this.current = extractVersion(matchingEntries[0][1]);
+        this.current = matchingEntries[0][1];
       }
     }
     return null;
@@ -203,9 +220,16 @@ export class Package {
     return this.wanted != this.latest && !this.isPreRelease();
   }
 
+  /** Checks if the current package is outdated in lockfile */
+  isCurrentOutdated(): boolean {
+    return this.current !== null && (this.current !== this.latest) &&
+      !this.isPreRelease();
+  }
+
   /** Checks if the current package is supported and up to date */
   isUpToDate(): boolean {
-    return this.isSupported() && !this.isOutdated();
+    return this.isSupported() && !this.isOutdated() &&
+      !this.isCurrentOutdated();
   }
 
   /**

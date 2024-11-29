@@ -51,7 +51,11 @@ function packageStatusText(
   allowUnused: boolean,
 ): string {
   let text = "";
-  if (p.isOutdated()) text += colorSchemes.outdated("Outdated ");
+  if (p.isCurrentOutdated()) {
+    text += colorSchemes.outdated("Outdated Lock ");
+  } else if (p.isOutdated()) {
+    text += colorSchemes.outdated("Outdated ");
+  }
   if (p.isPreRelease()) {
     text += colorSchemes.prerelease("Up-to-date (Pre-Release) ");
   }
@@ -75,6 +79,7 @@ export function printTable(
 ) {
   const tableData = packages?.map((p) => [
     `${p.registry}:${p.name}${(p.specifier ? ("@" + p.specifier) : "")}`,
+    p.current || "",
     p.wanted || "",
     p.latest || "",
     packageStatusText(p, allowUnused),
@@ -82,6 +87,7 @@ export function printTable(
 
   tableData?.unshift([
     Colors.bold("Package"),
+    Colors.bold("Current"),
     Colors.bold("Wanted"),
     Colors.bold("Latest"),
     Colors.bold(""),

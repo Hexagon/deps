@@ -11,7 +11,7 @@ export interface DenoPackages {
 /**
  * Represents the structure of a Deno lock file.
  */
-export interface DenoLock {
+export interface DenoLock3 {
   /** Information about the project's dependencies. */
   packages?: DenoPackages;
 }
