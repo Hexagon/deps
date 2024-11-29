@@ -144,9 +144,12 @@ export class Package {
         .filter(([name, _]) =>
           (name as string || "").includes(this.specifier!)
         );
+      // Special case for when Deno stores a dependency without the version range specifier
       if (matchingEntries.length === 0) {
         matchingEntries = Object.entries(specifiers)
-          .filter(([name, _]) => (name as string || "").includes(this.name));
+          .filter(([name, _]) =>
+            (name as string || "").includes(this.name + "@")
+          );
       }
       try {
         if (matchingEntries.length > 0) {
