@@ -148,18 +148,20 @@ export class Package {
         matchingEntries = Object.entries(specifiers)
           .filter(([name, _]) => (name as string || "").includes(this.name));
       }
-      if (matchingEntries.length > 0) {
-        // Sort matching entries descending by semver
-        matchingEntries.sort((v1, v2) =>
-          greaterThan(
-              parse(v1[1]!),
-              parse(v2[1]!),
-            )
-            ? -1
-            : 1
-        );
-        this.current = matchingEntries[0][1];
-      }
+      try {
+        if (matchingEntries.length > 0) {
+          // Sort matching entries descending by semver
+          matchingEntries.sort((v1, v2) =>
+            greaterThan(
+                parse(v1[1].split("_")[0]!),
+                parse(v2[1].split("_")[0]!),
+              )
+              ? -1
+              : 1
+          );
+          this.current = matchingEntries[0][1];
+        }
+      } catch { /* Ignore non parseable versions */ }
     }
     return null;
   }
