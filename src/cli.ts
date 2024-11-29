@@ -28,6 +28,10 @@ export function printHelpAndExit() {
   console.log("  --slim            Suppress table output");
   console.log("  --pre-release     Treat latest pre-release as latest");
   console.log("  --allow-unused    Don't report on unused packages");
+
+  console.log("");
+
+  Deno.exit(0);
 }
 
 export const colorSchemes = {
