@@ -124,56 +124,74 @@ export class Package {
   addDenoLockfile(
     denoLock: DenoLockGeneric | null,
   ): string | null {
-    let specifiers = null;
-
     if (denoLock === null) {
       return null;
     }
 
+    // Handle lock file version 3
     if (denoLock.version === "3") {
-      specifiers = (denoLock as DenoLock3).packages?.specifiers;
+      const specifiers = (denoLock as DenoLock3).packages?.specifiers;
+      if (
+        specifiers && typeof specifiers === "object" && this.specifier !== null
+      ) {
+        // Filter for the matching package
+        const matchingEntries = Object.entries(specifiers)
+          .filter(([_, val]) => (val as string || "").includes(this.name));
+        if (matchingEntries.length > 0) {
+          // Sort matching entries descending by semver
+          matchingEntries.sort((v1, v2) =>
+            greaterThan(
+                parse(extractVersion(v1[1])!),
+                parse(extractVersion(v2[1])!),
+              )
+              ? -1
+              : 1
+          );
+          this.current = extractVersion(matchingEntries[0][1]);
+        }
+      }
     } else if (denoLock.version === "4") {
-      specifiers = (denoLock as DenoLock4).specifiers;
+      const specifiers = (denoLock as DenoLock4).specifiers;
+      if (
+        specifiers && typeof specifiers === "object" && this.specifier !== null
+      ) {
+        // Filter for the matching package
+        let matchingEntries = Object.entries(specifiers)
+          .filter(([name, _]) =>
+            (name as string || "").includes(this.specifier!)
+          );
+
+        // Special case for when Deno stores a dependency without the version range specifier
+        if (matchingEntries.length === 0) {
+          matchingEntries = Object.entries(specifiers)
+            .filter(([name, _]) =>
+              (name as string || "").includes(this.name + "@")
+            );
+        }
+
+        try {
+          if (matchingEntries.length > 0) {
+            // Sort matching entries descending by semver
+            matchingEntries.sort((v1, v2) =>
+              greaterThan(
+                  parse(v1[1].split("_")[0]!),
+                  parse(v2[1].split("_")[0]!),
+                )
+                ? -1
+                : 1
+            );
+            this.current = matchingEntries[0][1].split("_")[0];
+          }
+        } catch {
+          // Ignore non parseable versions
+          return null;
+        }
+      }
     } else {
       // If denoLock.version is anything but 3 or 4, the lockfile is ignored
       return null;
     }
 
-    if (
-      specifiers && typeof specifiers === "object" && this.specifier !== null
-    ) {
-      // Filter for the matching package
-      let matchingEntries = Object.entries(specifiers)
-        .filter(([name, _]) =>
-          (name as string || "").includes(this.specifier!)
-        );
-
-      // Special case for when Deno stores a dependency without the version range specifier
-      if (matchingEntries.length === 0) {
-        matchingEntries = Object.entries(specifiers)
-          .filter(([name, _]) =>
-            (name as string || "").includes(this.name + "@")
-          );
-      }
-
-      try {
-        if (matchingEntries.length > 0) {
-          // Sort matching entries descending by semver
-          matchingEntries.sort((v1, v2) =>
-            greaterThan(
-                parse(v1[1].split("_")[0]!),
-                parse(v2[1].split("_")[0]!),
-              )
-              ? -1
-              : 1
-          );
-          this.current = matchingEntries[0][1].split("_")[0];
-        }
-      } catch {
-        // Ignore non parseable versions
-        return null;
-      }
-    }
     return null;
   }
 
