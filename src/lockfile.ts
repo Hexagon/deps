@@ -3,17 +3,37 @@ import { join } from "@std/path";
 /**
  * Represents the  packages used in a Deno project.
  */
-export interface DenoPackages {
+export interface DenoLock3Packages {
   /** An array of package identifiers or locations. */
   specifiers?: string[];
 }
 
 /**
- * Represents the structure of a Deno lock file.
+ * Represents the structure of a Deno lock file (version 3).
+ */
+export interface DenoLockGeneric {
+  /** Information about the lock file version. */
+  version: string;
+}
+
+/**
+ * Represents the structure of a Deno lock file (version 3).
+ */
+export interface DenoLock4 {
+  /** Deno lockfile version */
+  version: string;
+  /** Information about the project's dependencies. */
+  specifiers?: string[];
+}
+
+/**
+ * Represents the structure of a Deno lock file (version 3).
  */
 export interface DenoLock3 {
+  /** Deno lockfile version */
+  version: string;
   /** Information about the project's dependencies. */
-  packages?: DenoPackages;
+  packages?: DenoLock3Packages;
 }
 
 /**

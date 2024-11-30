@@ -4,7 +4,7 @@ import {
   type DenolandPackageMeta,
   fetchDenolandPackageMeta,
 } from "./denoland.ts";
-import type { DenoLock3, DenoPackages } from "./lockfile.ts";
+import type { DenoLock3, DenoLock4, DenoLockGeneric } from "./lockfile.ts";
 import {
   format,
   greaterThan,
@@ -122,28 +122,32 @@ export class Package {
    * Adds information from the deno lock file (`deno.lock`)
    */
   addDenoLockfile(
-    denoLock: DenoLock3 | DenoPackages | null,
+    denoLock: DenoLockGeneric | null,
   ): string | null {
     let specifiers = null;
-    if (
-      (denoLock as DenoLock3)?.packages?.specifiers &&
-      typeof (denoLock as DenoLock3)?.packages?.specifiers === "object"
-    ) {
-      specifiers = (denoLock as DenoLock3)?.packages?.specifiers;
-    } else if (
-      (denoLock as DenoPackages)?.specifiers &&
-      typeof (denoLock as DenoPackages)?.specifiers === "object"
-    ) {
-      specifiers = (denoLock as DenoPackages)?.specifiers;
+
+    if (denoLock === null) {
+      return null;
     }
+
+    if (denoLock.version === "3") {
+      specifiers = (denoLock as DenoLock3).packages?.specifiers;
+    } else if (denoLock.version === "4") {
+      specifiers = (denoLock as DenoLock4).specifiers;
+    } else {
+      // If denoLock.version is anything but 3 or 4, the lockfile is ignored
+      return null;
+    }
+
     if (
-      specifiers && this.specifier !== null
+      specifiers && typeof specifiers === "object" && this.specifier !== null
     ) {
       // Filter for the matching package
       let matchingEntries = Object.entries(specifiers)
         .filter(([name, _]) =>
           (name as string || "").includes(this.specifier!)
         );
+
       // Special case for when Deno stores a dependency without the version range specifier
       if (matchingEntries.length === 0) {
         matchingEntries = Object.entries(specifiers)
@@ -151,6 +155,7 @@ export class Package {
             (name as string || "").includes(this.name + "@")
           );
       }
+
       try {
         if (matchingEntries.length > 0) {
           // Sort matching entries descending by semver
@@ -164,7 +169,10 @@ export class Package {
           );
           this.current = matchingEntries[0][1].split("_")[0];
         }
-      } catch { /* Ignore non parseable versions */ }
+      } catch {
+        // Ignore non parseable versions
+        return null;
+      }
     }
     return null;
   }

@@ -55,20 +55,27 @@ function packageStatusText(
   allowUnused: boolean,
 ): string {
   let text = "";
+
+  // Update status
   if (p.isCurrentOutdated()) {
-    text += colorSchemes.outdated("Outdated Lock ");
+    text += colorSchemes.outdated("Outdated (Lockfile) ");
   } else if (p.isOutdated()) {
     text += colorSchemes.outdated("Outdated ");
-  }
-  if (p.isPreRelease()) {
+  } else if (p.isPreRelease()) {
     text += colorSchemes.prerelease("Up-to-date (Pre-Release) ");
-  }
-  if (p.isUpToDate() && !p.isPreRelease()) {
+  } else if (p.isUpToDate() && !p.isPreRelease()) {
     text += colorSchemes.upToDate("Up-to-date ");
   }
+
+  // Unsupported package
   if (!p.isSupported()) text += colorSchemes.unsupported("Unsupported ");
+
+  // Built in package
   if (p.isBuiltIn()) text += colorSchemes.builtin("Built-in ");
+
+  // Additional flag for unused packages (according to lock file)
   if (p.isUnused() && !allowUnused) text += colorSchemes.unused(`Unused `);
+
   return text;
 }
 

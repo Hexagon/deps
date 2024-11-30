@@ -8,11 +8,7 @@ import {
 } from "./src/cli.ts";
 import { tryReadJsoncFile } from "./src/utils.ts";
 import { stats } from "./src/stats.ts";
-import {
-  type DenoLock3,
-  type DenoPackages,
-  getDenoLockPath,
-} from "./src/lockfile.ts";
+import { type DenoLockGeneric, getDenoLockPath } from "./src/lockfile.ts";
 import { analyzeDependencies } from "./src/analyzer.ts";
 import type { Package } from "./src/package.ts";
 
@@ -27,7 +23,7 @@ async function main() {
 
   // Entry point
   let packages: Package[] | null = null;
-  let lockFile: DenoLock3 | DenoPackages | null = null;
+  let lockFile: DenoLockGeneric | null = null;
 
   const targetPath = parsedArgs.get("target");
   if (targetPath?.toString() === "true") {
