@@ -52,17 +52,16 @@ deno run -A jsr:@check/deps [options]
 ```
 ➜  deno run -A jsr:@check/deps
 
-Package                      Wanted     Latest                    
-jsr:@cross/utils@^0.2.1      0.2.1      0.7.0      Outdated       
-jsr:@std/path@0.220.1        0.220.1    0.220.1    Up-to-date     
-jsr:@cross/env@^0.2.5        0.2.7      1.0.0      Outdated       
-npm:diff@5.2.0               5.2.0      5.2.0      Up-to-date     
-npm:fast-xml-parser@4.3.5    4.3.5      4.3.6      Outdated       
-npm:fflate@0.8.2             0.8.2      0.8.2      Up-to-date     
-npm:linkedom@0.16.9          0.16.9     0.16.10    Outdated       
-npm:mrmime@2.0.0             2.0.0      2.0.0      Up-to-date   
+Package                            Current    Wanted     Latest                                  
+jsr:@cross/deepmerge@~1.0.0        1.0.0      1.0.0      1.0.0      Up-to-date                   
+jsr:@cross/env@~1.0.2              1.0.2      1.0.2      1.0.2      Up-to-date                   
+jsr:@cross/fs@~0.1.11              0.1.11     0.1.11     0.1.11     Up-to-date                   
+jsr:@std/assert@~1.0.0             1.0.8      1.0.8      1.0.8      Up-to-date              
+jsr:@std/io@~0.224.0               0.224.9    0.224.9    0.225.0    Outdated Lock                
+jsr:@std/path@~1.0.1               1.0.8      1.0.8      1.0.8      Up-to-date                   
+npm:zod@~3.23.6                    3.23.8     3.23.8     3.23.8     Up-to-date                   
 
-Updates available.
+Updates available. 
 ```
 
 ## Usage with Deno Tasks
