@@ -33,7 +33,7 @@ deno run -A jsr:@check/deps [options]
 > permissions and the cli name `check-deps`
 >
 > ```bash
-> deno install -n check-deps -r --allow-read=. --allow-net=jsr.io,registry.npmjs.org jsr:@check/deps jsr:@check/deps
+> deno install --global -n check-deps -r --allow-read=. --allow-net=jsr.io,registry.npmjs.org jsr:@check/deps jsr:@check/deps
 > ```
 >
 > Now you can run `check-deps` directly at the command line.
